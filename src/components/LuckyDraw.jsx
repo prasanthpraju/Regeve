@@ -19,7 +19,7 @@ import { IoSparkles, IoRocket } from "react-icons/io5";
 import axios from "axios";
 import ProfilePopup from "./ProfilePopup";
 import { useNavigate } from "react-router-dom";
-
+import Logo from "../assets/form-logo.png";
 
 // Animation variants (unchanged)
 const containerVariants = {
@@ -183,8 +183,7 @@ const LuckyDraw = () => {
   const [selectedMember, setSelectedMember] = useState(null);
   const [loading, setLoading] = useState(false);
 
-    const navigate = useNavigate();
-
+  const navigate = useNavigate();
 
   // Fetch all members data on component mount
   useEffect(() => {
@@ -194,13 +193,10 @@ const LuckyDraw = () => {
   const fetchAllMembers = async () => {
     try {
       setLoading(true);
-
       const response = await axios.get(
         "https://api.moviemads.com/api/event-forms"
       );
-
       const eligible = response.data.data.filter((m) => m.IsWinned === false);
-
       setAllMembers(eligible);
     } catch (error) {
       console.error("Error fetching members:", error);
@@ -208,35 +204,32 @@ const LuckyDraw = () => {
       setLoading(false);
     }
   };
-const updateWinnerStatus = async (memberId) => {
-  try {
-    const member = allMembers.find(m => m.Member_ID === memberId);
 
-    if (!member) {
-      console.error("Member not found:", memberId);
+  const updateWinnerStatus = async (memberId) => {
+    try {
+      const member = allMembers.find(m => m.Member_ID === memberId);
+      if (!member) {
+        console.error("Member not found:", memberId);
+        return false;
+      }
+
+      const response = await axios.put(
+        `https://api.moviemads.com/api/event-forms/${member.Member_ID}`,
+        {
+          data: {
+            IsWinned: true
+          }
+        }
+      );
+
+      console.log("Updated:", response.data);
+      return true;
+    } catch (error) {
+      console.error("Update failed:", error);
+      console.log("Backend says:", error.response?.data);
       return false;
     }
-
-    const response = await axios.put(
-      `https://api.moviemads.com/api/event-forms/${member.Member_ID}`,
-      {
-        data: {
-          IsWinned: true    // ✔ Correct field
-        }
-      }
-    );
-
-    console.log("Updated:", response.data);
-    return true;
-
-  } catch (error) {
-    console.error("Update failed:", error);
-    console.log("Backend says:", error.response?.data);
-    return false;
-  }
-};
-
-
+  };
 
   const startSpinning = () => {
     setIsSpinning(true);
@@ -246,7 +239,6 @@ const updateWinnerStatus = async (memberId) => {
     setShowProfile(false);
     setSelectedMember(null);
 
-    // Generate random number for display during spinning
     const randomNumber = Math.floor(Math.random() * 300) + 1;
     const numberStr = randomNumber.toString().padStart(3, "0");
     const newFinalValues = ["B", numberStr[0], numberStr[1], numberStr[2]];
@@ -258,14 +250,12 @@ const updateWinnerStatus = async (memberId) => {
     setBlastAnimation(true);
 
     try {
-      // Select a random member from eligible members (isWinned: false)
       if (allMembers.length > 0) {
         const randomIndex = Math.floor(Math.random() * allMembers.length);
         const winner = allMembers[randomIndex];
         console.log("Selected Winner:", winner);
         setSelectedMember(winner);
 
-        // Extract the number part from Member_ID (e.g., "B001" -> "001")
         const memberId = winner.Member_ID || winner.attributes?.Member_ID;
         const memberNumber = memberId ? memberId.substring(1) : "000";
         const finalDisplayValues = [
@@ -276,7 +266,6 @@ const updateWinnerStatus = async (memberId) => {
         ];
         setFinalValues(finalDisplayValues);
 
-        // Update the winner status in backend
         const updateSuccess = await updateWinnerStatus(memberId);
 
         const successMessages = [
@@ -295,7 +284,6 @@ const updateWinnerStatus = async (memberId) => {
           updateSuccess: updateSuccess,
         });
 
-        // Refresh the members list to remove the winner from future draws
         if (updateSuccess) {
           setTimeout(() => {
             fetchAllMembers();
@@ -348,8 +336,6 @@ const updateWinnerStatus = async (memberId) => {
     if (!member) return null;
 
     console.log("Formatting member:", member);
-
-    // Handle both direct properties and attributes nested structure
     const memberData = member.attributes || member;
     const baseUrl = "https://api.moviemads.com";
 
@@ -362,8 +348,8 @@ const updateWinnerStatus = async (memberId) => {
       image: memberData.Photo?.url
         ? `${baseUrl}${memberData.Photo.url}`
         : memberData.Photo?.data?.attributes?.url
-        ? `${baseUrl}${memberData.Photo.data.attributes.url}`
-        : null,
+          ? `${baseUrl}${memberData.Photo.data.attributes.url}`
+          : null,
       age: memberData.Age || 0,
       familyMembers: memberData.Family_Member_Count || 0,
       address: memberData.Address || "Not provided",
@@ -390,7 +376,26 @@ const updateWinnerStatus = async (memberId) => {
   }, [isSpinning, finalValues]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 flex items-center justify-center p-4 font-serif">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 flex items-center justify-center p-4 font-serif relative">
+
+      
+
+
+      {/* Fixed Go Home Button - Top Right */}
+      <motion.button
+        onClick={() => navigate("/")}
+        className={`fixed top-6 right-6 z-50 bg-gradient-to-br from-slate-900 via-purple-900 hover:from-blue-700 hover:to-cyan-800 text-white px-5 py-2.5 rounded-lg shadow-lg cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105 font-medium text-sm border border-white/30 backdrop-blur-sm ${showProfile ? 'blur-sm opacity-70' : 'opacity-100'}`}
+        initial={{ x: 100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        whileHover={{
+          scale: 1.05,
+          boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)"
+        }}
+      >
+        ← Go Home
+      </motion.button>
+
       {/* Profile Popup */}
       <ProfilePopup
         isOpen={showProfile}
@@ -435,15 +440,6 @@ const updateWinnerStatus = async (memberId) => {
           <GiCardRandom />
         </motion.div>
       </div>
-
-      <button
-    onClick={() => navigate("/")}
-    className="fixed  top-6 right-6 z-50 bg-gradient-to-br from-slate-900 via-purple-900 hover:from-blue-700
-     hover:to-cyan-800 text-white px-5 py-2.5 rounded-lg shadow-lg cursor-pointer transition-all duration-200
-      ease-in-out transform hover:scale-105 font-medium text-sm border border-white"
-  >
-    ← Go Home
-  </button>
 
       {/* Ultra Enhanced Blast Animation */}
       <AnimatePresence>
@@ -615,11 +611,12 @@ const updateWinnerStatus = async (memberId) => {
         )}
       </AnimatePresence>
 
+      {/* Main Lucky Draw Container */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="bg-gradient-to-br from-slate-800/90 to-purple-900/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-500/30 p-8 max-w-md w-full relative overflow-hidden"
+        className={`bg-gradient-to-br from-slate-800/90 to-purple-900/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-500/30 p-8 max-w-md w-full relative overflow-hidden transition-all duration-300 ${showProfile ? 'blur-sm opacity-70' : 'opacity-100'}`}
       >
         {/* Decorative Corner Elements */}
         <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-purple-400 rounded-tl-lg"></div>
@@ -682,10 +679,10 @@ const updateWinnerStatus = async (memberId) => {
                   index === 0
                     ? "sticky"
                     : isSpinning
-                    ? "flip"
-                    : blastAnimation
-                    ? "blast"
-                    : "initial"
+                      ? "flip"
+                      : blastAnimation
+                        ? "blast"
+                        : "initial"
                 }
                 className="w-16 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl shadow-2xl border-2 border-purple-400 flex items-center justify-center relative overflow-hidden"
               >
@@ -817,7 +814,7 @@ const updateWinnerStatus = async (memberId) => {
                 className="text-2xl font-bold mb-2 font-serif tracking-wide"
               >
                 {result.updateSuccess === false &&
-                result.message.includes("Error")
+                  result.message.includes("Error")
                   ? "ERROR"
                   : "CONGRATULATIONS!"}
               </motion.h3>
@@ -870,7 +867,7 @@ const updateWinnerStatus = async (memberId) => {
                     }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleViewProfile}
-                    className="w-full bg-gradient-to-r  from-blue-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-bold text-lg shadow-2xl flex items-center justify-center gap-3 border border-blue-400 relative overflow-hidden"
+                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-bold text-lg shadow-2xl flex items-center justify-center gap-3 border border-blue-400 relative overflow-hidden"
                   >
                     <FaUser className="text-sm" />
                     VIEW PROFILE

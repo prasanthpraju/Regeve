@@ -1,127 +1,231 @@
 // components/FoodManagementPage.jsx
-import React from 'react';
-import { Utensils, CheckSquare, QrCode, ClipboardList, Shield, Zap } from 'lucide-react';
-
-// Reusable component for displaying key metric data
-const MetricBox = ({ icon: Icon, value, label, color }) => (
-  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 text-center">
-    <Icon className={`w-8 h-8 ${color} mx-auto mb-3`} />
-    <p className="text-3xl font-extrabold text-gray-900">{value}</p>
-    <p className="text-sm text-gray-500 mt-1">{label}</p>
-  </div>
-);
+import React from "react";
+import {
+  Utensils,
+  Users,
+  ClipboardList,
+  PieChart,
+  CheckCircle,
+  BarChart3,
+  Download,
+  Shield,
+} from "lucide-react";
 
 const FoodManagement = () => {
+  const features = [
+    {
+      icon: <Utensils className="w-6 h-6" />,
+      title: "Meal Category Management",
+      description:
+        "Organize meals across Veg, Non-Veg, Jain, Vegan, and special dietary requirements with precise tracking.",
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: "Real-time Consumption Tracking",
+      description:
+        "Monitor food consumption live across all counters with instant updates and alerts.",
+    },
+    {
+      icon: <Shield className="w-6 h-6" />,
+      title: "Dietary Safety Control",
+      description:
+        "Manage allergies and dietary restrictions with clear labeling and safe meal alternatives.",
+    },
+    {
+      icon: <BarChart3 className="w-6 h-6" />,
+      title: "Waste Management Analytics",
+      description:
+        "Track food waste patterns and optimize quantities for future events to reduce costs.",
+    },
+  ];
+
+  const stats = [
+    { value: "200,000+", label: "Meals Managed" },
+    { value: "95%", label: "Waste Reduction" },
+    { value: "50+", label: "Events Supported" },
+    { value: "99.8%", label: "Accuracy Rate" },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 py-16 sm:py-24 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header and Core Value Proposition */}
-        <div className="text-center mb-16 p-8 bg-green-50 rounded-xl border border-green-100">
-          <Utensils className="w-12 h-12 text-green-700 mx-auto mb-4" />
-          <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-            Smart Food Management System
+    <div className="min-h-screen bg-white py-12 pt-24">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
+              <Utensils className="w-10 h-10 text-blue-600" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Food Management System
           </h1>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-            Simplify complex catering logistics, ensure dietary safety, and eliminate meal ticket fraud with integrated QR validation.
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Streamline your event catering with real-time tracking, waste
+            reduction, and comprehensive meal management for events of any
+            scale.
           </p>
         </div>
 
-        {/* Key Metrics/Benefits Section */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <MetricBox 
-            icon={Shield} 
-            value="100%" 
-            label="Dietary Safety Compliance" 
-            color="text-red-600" 
-          />
-          <MetricBox 
-            icon={Zap} 
-            value="<2 Sec" 
-            label="Average Meal Validation Time" 
-            color="text-blue-600" 
-          />
-          <MetricBox 
-            icon={ClipboardList} 
-            value="30%" 
-            label="Reduction in Food Waste" 
-            color="text-green-600" 
-          />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {stats.map((stat, index) => (
+            <div key={index} className="text-center p-6 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-900 mb-2">
+                {stat.value}
+              </div>
+              <div className="text-gray-600 text-sm">{stat.label}</div>
+            </div>
+          ))}
         </div>
 
-        {/* Feature Breakdown: Dietary Safety & Validation */}
-        <div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4">
-            Precision Catering & QR Validation
+        {/* Features Section */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+            Comprehensive Food Management
           </h2>
-          
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
-            {/* Feature List */}
-            <div>
-              <p className="text-gray-700 mb-6">
-                Our system links specific meal requirements directly to the attendee's digital QR ticket. This eliminates human error at the serving line, dramatically improving attendee safety and satisfaction.
-              </p>
-              <ul className="space-y-4">
-                <li className="flex items-start">
-                  <QrCode className="w-6 h-6 text-indigo-500 mr-3 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">QR Meal Entitlement</h4>
-                    <p className="text-gray-600 text-sm">One-time use validation for meal redemption prevents duplication and fraud.</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <CheckSquare className="w-6 h-6 text-indigo-500 mr-3 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Allergen Highlighting</h4>
-                    <p className="text-gray-600 text-sm">Staff tablets instantly display critical dietary warnings upon scanning the attendee's code.</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <Utensils className="w-6 h-6 text-indigo-500 mr-3 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Real-Time Headcounts</h4>
-                    <p className="text-gray-600 text-sm">Monitor how many meals (and which types) have been served to optimize refills and prevent waste.</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            
-            {/* Visual Placeholder */}
-            <div className="bg-gray-100 p-8 rounded-xl h-full flex items-center justify-center">
-                <span className="text-gray-400 italic">
-                    [Image Placeholder: QR Scanner Interface showing 'VEGAN MEAL ONLY' and 'VALIDATED']
-                </span>
-            </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="flex items-start space-x-4 p-6 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
+              >
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
+                  {feature.icon}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Planning & Reporting Section */}
-        <div className="bg-indigo-700 p-10 rounded-xl shadow-2xl">
-          <h2 className="text-3xl font-bold text-white mb-6">
-            Simplified Catering Planning
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-2 gap-12 mb-16">
+          {/* Left Column - Process */}
+          <div className="space-y-8">
+            <div className="bg-gray-50 rounded-xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                How It Works
+              </h3>
+
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Meal Planning
+                    </h4>
+                    <p className="text-gray-600 text-sm">
+                      Estimate quantities based on attendance and create
+                      categorized meal plans.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <ClipboardList className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Counter Management
+                    </h4>
+                    <p className="text-gray-600 text-sm">
+                      Coordinate multiple serving counters with real-time stock
+                      monitoring.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <PieChart className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Consumption Analytics
+                    </h4>
+                    <p className="text-gray-600 text-sm">
+                      Track consumption patterns and optimize future event
+                      planning.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Benefits */}
+          <div className="space-y-8">
+            <div className="bg-white border border-gray-200 rounded-xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                Key Benefits
+              </h3>
+
+              <div className="space-y-4">
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    Cost Reduction
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    Minimize food waste and optimize purchasing
+                  </p>
+                </div>
+
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    Time Efficiency
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    Automate tracking and reduce manual counting
+                  </p>
+                </div>
+
+                <div className="p-4 bg-purple-50 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    Attendee Satisfaction
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    Ensure dietary needs are met with precision
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Card */}
+          </div>
+        </div>
+
+        {/* Use Cases */}
+        <div className="bg-gray-50 rounded-xl p-8">
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
+            Perfect For All Event Types
           </h2>
-          <div className="grid md:grid-cols-2 gap-8 text-indigo-100">
-            <div>
-              <h4 className="text-xl font-semibold mb-3">Pre-Event Reporting</h4>
-              <p>
-                Generate comprehensive reports detailing exact counts for every dietary category (vegetarian, allergies, standard meals). Exportable in PDF or CSV formats for direct submission to your catering vendor.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-xl font-semibold mb-3">Post-Event Auditing</h4>
-              <p>
-                Access detailed consumption logs showing exactly when and where meals were redeemed. Use this data for accurate vendor billing and improved budgeting for future events.
-              </p>
-            </div>
-          </div>
-          <div className="mt-8 text-center">
-            <button className="inline-flex items-center bg-yellow-400 text-indigo-900 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-yellow-300 transition duration-300">
-                Download Sample Catering Report
-                <ClipboardList className="w-5 h-5 ml-3" />
-            </button>
+          <div className="grid md:grid-cols-4 gap-6 text-center">
+            {[
+              { name: "Conferences", count: "500-5,000 attendees" },
+              { name: "Corporate Events", count: "50-2,000 attendees" },
+              { name: "Weddings", count: "100-1,000 guests" },
+              { name: "Festivals", count: "1,000-10,000+ attendees" },
+            ].map((event, index) => (
+              <div key={index} className="p-4">
+                <div className="font-semibold text-gray-900 mb-1">
+                  {event.name}
+                </div>
+                <div className="text-sm text-gray-600">{event.count}</div>
+              </div>
+            ))}
           </div>
         </div>
-
       </div>
     </div>
   );

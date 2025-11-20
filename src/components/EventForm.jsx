@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Logo from "../assets/form-logo.png"
 
 
 export default function EventForm() {
@@ -19,7 +20,7 @@ export default function EventForm() {
     Non_Veg_Count: "",
   };
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
 
   const [form, setForm] = useState(defaultForm);
@@ -91,27 +92,38 @@ export default function EventForm() {
   return (
     <div className="min-h-screen  bg-gradient-to-br from-gray-50 to-gray-100 py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-       {/* Header */}
-<div className="text-center mb-6 sm:mb-8 relative">
-  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
-    Event Registration Form
-  </h1>
-  <p className="text-gray-600 text-sm sm:text-lg">
-    Please fill in your details below
-  </p>
-  
-  {/* Go Home Button - Fixed on right side */}
-  <button
-    onClick={() => navigate("/")}
-    className="fixed top-6 right-6 z-50 bg-gradient-to-br from-blue-600 to-cyan-700 hover:from-blue-700 hover:to-cyan-800 text-white px-5 py-2.5 rounded-lg shadow-lg cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105 font-medium text-sm border border-blue-500"
-  >
-    ← Go Home
-  </button>
-</div>
+        {/* Header */}
+        <div className="text-center mb-6 sm:mb-8 relative">
 
-        
+          {/* Logo */}
+          <div className="flex justify-center mb-4">
+            <img
+              src={Logo}
+              alt="Event Logo"
+             className="w-32 sm:w-40 md:w-48"
 
-        
+            />
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
+            Event Registration Form
+          </h1>
+          <p className="text-gray-600 text-sm sm:text-lg">
+            Please fill in your details below
+          </p>
+
+          {/* Go Home Button - Fixed on right side */}
+          <button
+            onClick={() => navigate("/")}
+            className="fixed top-6 right-6 z-50 bg-gradient-to-br from-blue-600 to-cyan-700 hover:from-blue-700 hover:to-cyan-800 text-white px-5 py-2.5 rounded-lg shadow-lg cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105 font-medium text-sm border border-blue-500"
+          >
+            ← Go Home
+          </button>
+        </div>
+
+
+
+
 
         {/* Form Container */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl border border-gray-200 overflow-hidden">
@@ -403,7 +415,7 @@ export default function EventForm() {
             <div className="flex justify-center pt-4 sm:pt-6">
               <button
                 type="submit"
-                className="w-full cursor-pointer sm:w-auto px-6 sm:px-12 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50"
+                className="w-full cursor-pointer sm:w-auto px-6 sm:px-12 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-blue-600 to-cyan-700 hover:from-blue-700 hover:to-cyan-800 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50"
               >
                 Submit Registration
               </button>
@@ -424,7 +436,7 @@ export default function EventForm() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-2 sm:p-4">
           <div className="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-4xl mx-auto overflow-y-auto max-h-[95vh]">
             {/* Modern Header - Professional Style */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 sm:p-6">
+            <div className="bg-gradient-to-r from-blue-600 to-cyan-700 p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3 sm:space-x-4">
                   <div className="flex-shrink-0">
@@ -451,12 +463,34 @@ export default function EventForm() {
                     </p>
                   </div>
                 </div>
-                <div className="sm:block">
-                  <div className="bg-white bg-opacity-20 px-2 py-1 sm:px-3 sm:py-1 rounded-full">
-                    <span className="text-green-500 text-xs sm:text-sm font-medium">
-                      ✓ Verified
-                    </span>
+                <div className="flex items-center space-x-2">
+                  <div className="hidden sm:block">
+                    <div className="bg-white bg-opacity-20 px-2 py-1 sm:px-3 sm:py-1 rounded-full">
+                      <span className="text-green-500 text-xs sm:text-sm font-medium">
+                        ✓ Verified
+                      </span>
+                    </div>
                   </div>
+                  {/* Close Icon */}
+                  <button
+                    onClick={() => setShowPopup(false)}
+                    className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-700"
+                    aria-label="Close popup"
+                  >
+                    <svg
+                      className="w-5 h-5 sm:w-6 sm:h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -690,7 +724,7 @@ export default function EventForm() {
                 </div>
                 <button
                   onClick={() => setShowPopup(false)}
-                  className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm w-full sm:w-auto"
+                  className="px-6 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm w-full sm:w-auto"
                 >
                   Continue
                 </button>

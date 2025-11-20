@@ -1,114 +1,215 @@
-// components/EventDashboardPage.jsx
+ // components/EventDashboardPage.jsx
 import React from 'react';
-import { BarChart2, Zap, Clock, Shield, Users, TrendingUp, Cpu, Download } from 'lucide-react';
-
-// Reusable component for displaying key metric data
-const StatCard = ({ icon: Icon, value, label, color }) => (
-  <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transition duration-300 hover:shadow-xl">
-    <div className="flex items-center">
-        <Icon className={`w-8 h-8 ${color} mr-4`} />
-        <div>
-            <p className="text-3xl font-extrabold text-gray-900">{value}</p>
-            <p className="text-sm text-gray-500 mt-1">{label}</p>
-        </div>
-    </div>
-  </div>
-);
+import { BarChart2, Users, TrendingUp, Clock, Download, CheckCircle } from 'lucide-react';
 
 const DashboardSystemPage = () => {
+  const stats = [
+    {
+      icon: <Users className="w-6 h-6" />,
+      value: "1,845",
+      label: "Checked-in Attendees",
+      color: "green"
+    },
+    {
+      icon: <TrendingUp className="w-6 h-6" />,
+      value: "87%",
+      label: "Registration Rate",
+      color: "blue"
+    },
+    {
+      icon: <Clock className="w-6 h-6" />,
+      value: "09:15 AM",
+      label: "Peak Entry Time",
+      color: "orange"
+    },
+    {
+      icon: <CheckCircle className="w-6 h-6" />,
+      value: "99.9%",
+      label: "System Uptime",
+      color: "purple"
+    }
+  ];
+
+  const features = [
+    {
+      title: "Live Check-in Monitoring",
+      description: "Track attendee check-ins in real-time across all entry points with instant updates",
+      items: ["Queue length monitoring", "Scanner throughput", "Multiple entry points"]
+    },
+    {
+      title: "Attendance Analytics",
+      description: "Comprehensive reporting on attendance patterns and participation metrics",
+      items: ["Session attendance tracking", "Demographic analysis", "Engagement metrics"]
+    }
+  ];
+
+  const getColorClasses = (color) => {
+    const colors = {
+      green: {
+        bg: 'bg-green-50',
+        icon: 'bg-green-100 text-green-600',
+        text: 'text-green-600'
+      },
+      blue: {
+        bg: 'bg-blue-50',
+        icon: 'bg-blue-100 text-blue-600',
+        text: 'text-blue-600'
+      },
+      orange: {
+        bg: 'bg-orange-50',
+        icon: 'bg-orange-100 text-orange-600',
+        text: 'text-orange-600'
+      },
+      purple: {
+        bg: 'bg-purple-50',
+        icon: 'bg-purple-100 text-purple-600',
+        text: 'text-purple-600'
+      }
+    };
+    return colors[color] || colors.blue;
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-16 sm:py-24 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white py-12 pt-24">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header and Core Value Proposition */}
-        <div className="text-center mb-16 p-8 bg-blue-50 rounded-xl border border-blue-100">
-          <BarChart2 className="w-12 h-12 text-blue-700 mx-auto mb-4" />
-          <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-            The Real-time Event Dashboard
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
+              <BarChart2 className="w-10 h-10 text-blue-600" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Event Dashboard
           </h1>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-            Your single source of truth for operational metrics, attendance tracking, and system performance—make decisions with data, not guesswork.
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Comprehensive overview of your event with real-time metrics, attendance tracking, 
+            and performance analytics in one centralized view.
           </p>
         </div>
 
-        {/* Real-time Key Performance Indicators (KPIs) */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-10">
-            Live Operational Metrics
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard 
-              icon={Users} 
-              value="1,845" 
-              label="Checked-in Attendees" 
-              color="text-green-600" 
-            />
-            <StatCard 
-              icon={TrendingUp} 
-              value="87%" 
-              label="Registration Completion Rate" 
-              color="text-indigo-600" 
-            />
-            <StatCard 
-              icon={Clock} 
-              value="09:15 AM" 
-              label="Peak Entry Time Today" 
-              color="text-orange-600" 
-            />
-            <StatCard 
-              icon={Cpu} 
-              value="99.9%" 
-              label="System Uptime (SLA)" 
-              color="text-blue-600" 
-            />
-          </div>
-        </div>
-
-        {/* Dashboard Components & Analytics Breakdown */}
-        <div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4">
-            Advanced Monitoring and Segmentation
-          </h2>
-          
-          <div className="grid lg:grid-cols-2 gap-10">
-            {/* Component 1: Live Check-in Visualizer */}
-            <div className="p-6 bg-gray-50 rounded-xl border border-gray-100">
-                <Zap className="w-6 h-6 text-red-500 mb-3" />
-                <h3 className="font-semibold text-xl text-gray-900 mb-2">Check-in Flow Visualizer</h3>
-                <p className="text-gray-600 mb-4 text-sm">
-                    Monitor queue lengths and scanner throughput across multiple entry points in real-time. Immediately deploy resources where bottlenecks are forming.
-                </p>
-                <div className="h-40 bg-white border border-dashed border-gray-300 rounded flex items-center justify-center text-gray-400 italic">
-                    
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {stats.map((stat, index) => {
+            const colorClasses = getColorClasses(stat.color);
+            return (
+              <div key={index} className={`${colorClasses.bg} rounded-xl p-6 text-center`}>
+                <div className={`w-12 h-12 ${colorClasses.icon} rounded-lg flex items-center justify-center mx-auto mb-3`}>
+                  {stat.icon}
                 </div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+                <div className="text-gray-600 text-sm">{stat.label}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-2 gap-12 mb-16">
+          {/* Left Column - Features */}
+          <div className="space-y-8">
+            {features.map((feature, index) => (
+              <div key={index} className="bg-gray-50 rounded-xl p-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  {feature.description}
+                </p>
+                <div className="space-y-3">
+                  {feature.items.map((item, itemIndex) => (
+                    <div key={itemIndex} className="flex items-center text-gray-700">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
+                      <span className="text-sm">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Right Column - Additional Info */}
+          <div className="space-y-8">
+            <div className="bg-white border border-gray-200 rounded-xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Real-time Monitoring</h3>
+              
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Live Updates</h4>
+                    <p className="text-gray-600 text-sm">
+                      Instant data synchronization across all event systems
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <TrendingUp className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Performance Metrics</h4>
+                    <p className="text-gray-600 text-sm">
+                      Track key performance indicators and event success metrics
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <Users className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Attendance Patterns</h4>
+                    <p className="text-gray-600 text-sm">
+                      Analyze attendee behavior and participation across sessions
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Component 2: Segmentation & Reporting */}
-            <div className="p-6 bg-gray-50 rounded-xl border border-gray-100">
-                <Shield className="w-6 h-6 text-purple-500 mb-3" />
-                <h3 className="font-semibold text-xl text-gray-900 mb-2">Custom Segment Reporting</h3>
-                <p className="text-gray-600 mb-4 text-sm">
-                    Filter attendance data by ticket type, VIP status, session attendance, or organizational tier. Export detailed reports instantly for sponsors and internal stakeholders.
-                </p>
-                <ul className="space-y-3">
-                    <li className="flex items-center text-sm text-gray-700"><Download className="w-4 h-4 text-purple-600 mr-2" /> PDF and CSV exports ready.</li>
-                    <li className="flex items-center text-sm text-gray-700"><Download className="w-4 h-4 text-purple-600 mr-2" /> Sponsorship ROI measurement.</li>
-                    <li className="flex items-center text-sm text-gray-700"><Download className="w-4 h-4 text-purple-600 mr-2" /> Post-event attendance audit logs.</li>
-                </ul>
+            {/* Quick Actions */}
+            <div className="bg-blue-50 rounded-xl p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
+              <button className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+                <Download className="w-5 h-5" />
+                <span>Export Event Report</span>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* High-Level Reporting CTA */}
-        <div className="mt-16 text-center bg-blue-700/80 p-10 rounded-xl shadow-2xl">
-          <h3 className="text-3xl font-bold text-white mb-4">Need an Executive Summary?</h3>
-          <p className="text-blue-200 mb-8 max-w-3xl mx-auto">
-            Generate polished, event-wide summaries and audit trails automatically from the dashboard for immediate stakeholder delivery.
-          </p>
-          <button className="inline-flex items-center bg-yellow-400 text-blue-900 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-yellow-300 transition duration-300 transform hover:scale-[1.02]">
-            Generate Full Event Report
-            <BarChart2 className="w-5 h-5 ml-3" />
-          </button>
+        {/* Use Cases */}
+        <div className="bg-gray-50 rounded-xl p-8">
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Dashboard Features</h2>
+          <div className="grid md:grid-cols-3 gap-6 text-center">
+            {[
+              { name: "Registration Analytics", count: "Live tracking" },
+              { name: "Attendance Monitoring", count: "Real-time updates" },
+              { name: "System Overview", count: "Performance metrics" }
+            ].map((item, index) => (
+              <div key={index} className="p-4">
+                <div className="font-semibold text-gray-900 mb-1">{item.name}</div>
+                <div className="text-sm text-gray-600">{item.count}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="text-center mt-12">
+          <div className="bg-gray-50 rounded-xl p-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Need Detailed Reports?</h3>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              Generate comprehensive event reports with detailed analytics and insights.
+            </p>
+            <button className="bg-gray-800 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+              Generate Full Report
+            </button>
+          </div>
         </div>
 
       </div>

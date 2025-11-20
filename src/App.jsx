@@ -15,6 +15,7 @@ import LuckydrawFooter from './components/services/LuckydrawFooter';
 import FoodManagement from './components/services/FoodManagement';
 import DashboardSystemPage from './components/services/DashboardSystemPage';
 import ScrollToTop from './components/ScrollToTop';
+import UserDetail from './components/UserDetails';
 
 
 function App() {
@@ -38,7 +39,7 @@ function App() {
         <Route path='/service/luckydraw-system-page' element={<LuckydrawFooter />} />
         <Route path='/service/food-management' element={<FoodManagement />} />
         <Route path='/service/dashboard-system-page' element={<DashboardSystemPage />} />
-
+        <Route path='/user-details' element={<UserDetail />} />
       </Routes>
       {!hideLayout && <Footer />}
     </>
