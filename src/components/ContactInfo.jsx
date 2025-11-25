@@ -132,7 +132,7 @@ const ContactInfo = () => {
                                 <div>
                                     <p className="text-gray-400 text-sm">Email</p>
                                     <a href="mailto:info@bilimbedigital.com" className="text-white text-lg font-semibold hover:text-blue-300 transition-colors">
-                                        hello@regeve.com
+                                        regeveindia@gmail.com
                                     </a>
                                 </div>
                             </div>
@@ -144,9 +144,7 @@ const ContactInfo = () => {
                                 <div>
                                     <p className="text-gray-400 text-sm">Phone</p>
                                     <div className="text-white text-lg font-semibold">
-                                        <a href="tel:+919840398703" className="hover:text-green-300 transition-colors">+91 98403 98703</a>
-                                        <span className="mx-2">|</span>
-                                        <a href="tel:+919159488752" className="hover:text-green-300 transition-colors">+91 91594 88752</a>
+                                        <a href="tel:+919884030207" className="hover:text-green-300 transition-colors">+91 98840 30207</a>                                    
                                     </div>
                                 </div>
                             </div>

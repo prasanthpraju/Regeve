@@ -260,7 +260,7 @@ const EditPopup = ({ user, onClose, onSaved }) => {
     Veg_Count: "",
     Company_ID: "",
     Food: "",
-     IsGiftReceived: false,
+    IsGiftReceived: false,
   });
 
   const [photoFile, setPhotoFile] = useState(null);
@@ -339,7 +339,6 @@ const EditPopup = ({ user, onClose, onSaved }) => {
         Food: form.Food,
         IsWinned: form.IsWinned,
         IsGiftReceived: form.IsGiftReceived === true ? true : false,
-
       };
 
       if (uploadedPhoto) {
@@ -471,47 +470,46 @@ const EditPopup = ({ user, onClose, onSaved }) => {
               </div>
             </div>
             {/* Gift Received Toggle */}
-<div className="flex items-center justify-between p-5 bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
-  <label className="text-sm font-semibold text-gray-700 flex items-center">
-    <span className="text-lg mr-2">🎁</span>
-    Gift Received
-  </label>
+            <div className="flex mt-2  items-center justify-between px-9 py-4 bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
+              <label className="text-sm font-semibold text-gray-700 flex items-center">
+                <span className="text-lg mr-2">🎁</span>
+                Gift Received
+              </label>
 
-  <label className="inline-flex items-center cursor-pointer">
-    <input
-      type="checkbox"
-      checked={form.IsGiftReceived}
-      onChange={(e) =>
-        setForm((prev) => ({
-          ...prev,
-          IsGiftReceived: e.target.checked,
-        }))
-      }
-      className="hidden"
-    />
+              <label className="inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.IsGiftReceived}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      IsGiftReceived: e.target.checked,
+                    }))
+                  }
+                  className="hidden"
+                />
 
-    <div
-      className={`w-14 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${
-        form.IsGiftReceived ? "bg-green-500" : "bg-gray-300"
-      }`}
-    >
-      <div
-        className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${
-          form.IsGiftReceived ? "translate-x-7" : "translate-x-0"
-        }`}
-      />
-    </div>
+                <div
+                  className={`w-14 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${
+                    form.IsGiftReceived ? "bg-green-500" : "bg-gray-300"
+                  }`}
+                >
+                  <div
+                    className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${
+                      form.IsGiftReceived ? "translate-x-7" : "translate-x-0"
+                    }`}
+                  />
+                </div>
 
-    <span
-      className={`ml-3 text-sm font-medium ${
-        form.IsGiftReceived ? "text-green-600" : "text-gray-500"
-      }`}
-    >
-      {form.IsGiftReceived ? "Received" : "Pending"}
-    </span>
-  </label>
-</div>
-
+                <span
+                  className={`ml-3 text-sm font-medium ${
+                    form.IsGiftReceived ? "text-green-600" : "text-gray-500"
+                  }`}
+                >
+                  {form.IsGiftReceived ? "Received" : "Pending"}
+                </span>
+              </label>
+            </div>
           </div>
 
           {/* Right Side - Form */}
@@ -655,7 +653,6 @@ const Dashboard = () => {
     }
   }, []);
 
-
   // ----------------------------- FETCH API -----------------------------
   const fetchData = async () => {
     try {
@@ -675,7 +672,7 @@ const Dashboard = () => {
         whatsapp: item.WhatsApp_Number,
         email: item.Email,
         address: item.Address,
-        companyId: item.Company_ID, 
+        companyId: item.Company_ID,
 
         adultcount: Number(item.Adult_Count) || 0,
         childrencount: Number(item.Children_Count) || 0,
@@ -685,12 +682,10 @@ const Dashboard = () => {
         isPresent: item.IsPresent === true,
         IsVerified_Member: item.IsVerified_Member === true,
 
- isGiftReceived:
-  item.IsGiftReceived === true ||
-  item.IsGiftReceived === 1 ||
-  item.IsGiftReceived === "true",
-
-
+        isGiftReceived:
+          item.IsGiftReceived === true ||
+          item.IsGiftReceived === 1 ||
+          item.IsGiftReceived === "true",
 
         raw: item,
       }));
@@ -701,8 +696,9 @@ const Dashboard = () => {
       // TOTAL REGISTERED USERS
       // -----------------------------
       // ONLY VERIFIED USERS ARE COUNTED AS REGISTERED
-const totalRegistered = formatted.filter(u => u.IsVerified_Member === true).length;
-
+      const totalRegistered = formatted.filter(
+        (u) => u.IsVerified_Member === true
+      ).length;
 
       // -----------------------------
       // PRESENT USERS ONLY
@@ -712,10 +708,9 @@ const totalRegistered = formatted.filter(u => u.IsVerified_Member === true).leng
       // -----------------------------
       // GIFTS
       // -----------------------------
-const totalGifts = presentUsers.filter(u => u.isGiftReceived).length;
-
-
-
+      const totalGifts = presentUsers.filter(
+        (u) => u.isGiftReceived === true
+      ).length;
 
       // -----------------------------
       // TOTAL ATTENDEES (PRESENT USERS)
@@ -725,7 +720,10 @@ const totalGifts = presentUsers.filter(u => u.isGiftReceived).length;
       // -----------------------------
       // HEAD COUNTS
       // -----------------------------
-      const totalAdults = presentUsers.reduce((sum, u) => sum + u.adultcount, 0);
+      const totalAdults = presentUsers.reduce(
+        (sum, u) => sum + u.adultcount,
+        0
+      );
       const totalChildren = presentUsers.reduce(
         (sum, u) => sum + u.childrencount,
         0
@@ -751,43 +749,40 @@ const totalGifts = presentUsers.filter(u => u.isGiftReceived).length;
     }
   };
 
-const handleVerificationToggle = async (memberId, newStatus) => {
-  try {
-    // update UI instantly
-    setUsers(prev =>
-      prev.map(u =>
-        u.userId === memberId ? { ...u, IsVerified_Member: newStatus } : u
-      )
-    );
+  const handleVerificationToggle = async (memberId, newStatus) => {
+    try {
+      // update UI instantly
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.userId === memberId ? { ...u, IsVerified_Member: newStatus } : u
+        )
+      );
 
-    // send correct body structure expected by backend
-    await axios.put(
-      `https://api.regeve.in/api/event-forms/${memberId}`,
-      {
-        data: {
-          IsVerified_Member: newStatus
+      // send correct body structure expected by backend
+      await axios.put(
+        `https://api.regeve.in/api/event-forms/${memberId}`,
+        {
+          data: {
+            IsVerified_Member: newStatus,
+          },
+        },
+        {
+          headers: { "Content-Type": "application/json" },
         }
-      },
-      {
-        headers: { "Content-Type": "application/json" }
-      }
-    );
+      );
 
-    console.log("Updated verified:", memberId);
-  } catch (error) {
-    console.error("Verification failed:", error);
+      console.log("Updated verified:", memberId);
+    } catch (error) {
+      console.error("Verification failed:", error);
 
-    // rollback
-    setUsers(prev =>
-      prev.map(u =>
-        u.userId === memberId ? { ...u, IsVerified_Member: !newStatus } : u
-      )
-    );
-  }
-};
-
-
-
+      // rollback
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.userId === memberId ? { ...u, IsVerified_Member: !newStatus } : u
+        )
+      );
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -797,7 +792,7 @@ const handleVerificationToggle = async (memberId, newStatus) => {
   const filteredUsers = users.filter(
     (u) =>
       u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.userId?.toLowerCase().includes(searchTerm.toLowerCase())||
+      u.userId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       u.companyId?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -932,12 +927,13 @@ const handleVerificationToggle = async (memberId, newStatus) => {
                         fill="none"
                         stroke="url(#blueGradient)"
                         strokeWidth="3"
-                        strokeDasharray={`${dashboardData.totalRegistered === 0
+                        strokeDasharray={`${
+                          dashboardData.totalRegistered === 0
                             ? 0
                             : (dashboardData.totalAttendees /
-                              dashboardData.totalRegistered) *
-                            100
-                          }, 100`}
+                                dashboardData.totalRegistered) *
+                              100
+                        }, 100`}
                         className="transition-all duration-1000 ease-out"
                       />
 
@@ -962,10 +958,10 @@ const handleVerificationToggle = async (memberId, newStatus) => {
                       {dashboardData.totalRegistered === 0
                         ? 0
                         : (
-                          (dashboardData.totalAttendees /
-                            dashboardData.totalRegistered) *
-                          100
-                        ).toFixed(0)}
+                            (dashboardData.totalAttendees /
+                              dashboardData.totalRegistered) *
+                            100
+                          ).toFixed(0)}
                       %
                     </span>
                   </div>
@@ -1070,12 +1066,13 @@ const handleVerificationToggle = async (memberId, newStatus) => {
                     <div
                       className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-1000"
                       style={{
-                        width: `${dashboardData.totalAttendees === 0
+                        width: `${
+                          dashboardData.totalAttendees === 0
                             ? 0
                             : (dashboardData.totalGifts /
-                              dashboardData.totalAttendees) *
-                            100
-                          }%`,
+                                dashboardData.totalAttendees) *
+                              100
+                        }%`,
                       }}
                     ></div>
                   </div>
@@ -1097,13 +1094,14 @@ const handleVerificationToggle = async (memberId, newStatus) => {
                     <div
                       className="bg-gradient-to-r from-orange-400 to-orange-500 h-2 rounded-full transition-all duration-1000"
                       style={{
-                        width: `${dashboardData.totalAttendees === 0
+                        width: `${
+                          dashboardData.totalAttendees === 0
                             ? 0
                             : ((dashboardData.totalAttendees -
-                              dashboardData.totalGifts) /
-                              dashboardData.totalAttendees) *
-                            100
-                          }%`,
+                                dashboardData.totalGifts) /
+                                dashboardData.totalAttendees) *
+                              100
+                        }%`,
                       }}
                     ></div>
                   </div>
@@ -1116,10 +1114,10 @@ const handleVerificationToggle = async (memberId, newStatus) => {
                   {dashboardData.totalAttendees === 0
                     ? "0%"
                     : (
-                      (dashboardData.totalGifts /
-                        dashboardData.totalAttendees) *
-                      100
-                    ).toFixed(1) + "%"}
+                        (dashboardData.totalGifts /
+                          dashboardData.totalAttendees) *
+                        100
+                      ).toFixed(1) + "%"}
                 </p>
               </div>
             </div>
@@ -1243,42 +1241,52 @@ const handleVerificationToggle = async (memberId, newStatus) => {
 
                         {/* Verified Checkbox */}
                         <td className="px-8 py-6">
-  <div className="flex justify-center">
-    <label className="inline-flex items-center cursor-pointer">
+                          <div className="flex justify-center">
+                            <label className="inline-flex items-center cursor-pointer">
+                              {/* CHECKBOX (Uses Member_ID here!) */}
+                              <input
+                                type="checkbox"
+                                checked={user.IsVerified_Member || false}
+                                onChange={(e) =>
+                                  handleVerificationToggle(
+                                    user.userId,
+                                    e.target.checked
+                                  )
+                                }
+                                className="hidden"
+                              />
 
-      {/* CHECKBOX (Uses Member_ID here!) */}
-      <input
-        type="checkbox"
-        checked={user.IsVerified_Member || false}
-        onChange={(e) =>
-          handleVerificationToggle(user.userId, e.target.checked)
-        }
-        className="hidden"
-      />
+                              {/* Toggle UI */}
+                              <div
+                                className={`w-14 h-7 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300 ${
+                                  user.IsVerified_Member
+                                    ? "bg-green-500"
+                                    : "bg-gray-300"
+                                }`}
+                              >
+                                <div
+                                  className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${
+                                    user.IsVerified_Member
+                                      ? "translate-x-7"
+                                      : "translate-x-0"
+                                  }`}
+                                />
+                              </div>
 
-      {/* Toggle UI */}
-      <div
-        className={`w-14 h-7 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300 ${
-          user.IsVerified_Member ? "bg-green-500" : "bg-gray-300"
-        }`}
-      >
-        <div
-          className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${
-            user.IsVerified_Member ? "translate-x-7" : "translate-x-0"
-          }`}
-        />
-      </div>
-
-      <span
-        className={`ml-3 text-sm font-medium ${
-          user.IsVerified_Member ? "text-green-600" : "text-gray-500"
-        }`}
-      >
-        {user.IsVerified_Member ? "Verified" : "Unverified"}
-      </span>
-    </label>
-  </div>
-</td>
+                              <span
+                                className={`ml-3 text-sm font-medium ${
+                                  user.IsVerified_Member
+                                    ? "text-green-600"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                {user.IsVerified_Member
+                                  ? "Verified"
+                                  : "Unverified"}
+                              </span>
+                            </label>
+                          </div>
+                        </td>
 
                         {/* Actions */}
                         <td className="px-8 py-6">
@@ -1341,8 +1349,7 @@ const handleVerificationToggle = async (memberId, newStatus) => {
           <div className="text-gray-600 text-lg">
             Showing{" "}
             <span className="font-semibold text-gray-900">
-              {indexOfFirst + 1}-
-              {Math.min(indexOfLast, filteredUsers.length)}
+              {indexOfFirst + 1}-{Math.min(indexOfLast, filteredUsers.length)}
             </span>{" "}
             of{" "}
             <span className="font-semibold text-gray-900">
@@ -1379,16 +1386,17 @@ const handleVerificationToggle = async (memberId, newStatus) => {
                   currentPage <= 3
                     ? i + 1
                     : currentPage >= totalPages - 2
-                      ? totalPages - 4 + i
-                      : currentPage - 2 + i;
+                    ? totalPages - 4 + i
+                    : currentPage - 2 + i;
                 return (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`w-12 h-12 rounded-xl text-base font-semibold transition-all duration-200 ${currentPage === page
+                    className={`w-12 h-12 rounded-xl text-base font-semibold transition-all duration-200 ${
+                      currentPage === page
                         ? "bg-blue-600 text-white shadow-lg"
                         : "text-gray-700 hover:bg-gray-100"
-                      }`}
+                    }`}
                   >
                     {page}
                   </button>
@@ -1397,9 +1405,7 @@ const handleVerificationToggle = async (memberId, newStatus) => {
             </div>
 
             <button
-              onClick={() =>
-                setCurrentPage((c) => Math.min(c + 1, totalPages))
-              }
+              onClick={() => setCurrentPage((c) => Math.min(c + 1, totalPages))}
               disabled={currentPage === totalPages}
               className="px-5 py-2.5 border-2 border-gray-300 rounded-xl text-base font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center"
             >
@@ -1422,7 +1428,6 @@ const handleVerificationToggle = async (memberId, newStatus) => {
         </div>
       )}
     </div>
-      
   );
 };
 

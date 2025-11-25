@@ -1,4 +1,4 @@
- import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
@@ -31,7 +31,9 @@ const StatCard = ({
   iconColor = "text-indigo-600",
   className = "",
 }) => (
-  <div className={`p-4 rounded-xl transition duration-300 bg-white hover:bg-indigo-50/50 flex flex-col items-center text-center border border-gray-100 ${className}`}>
+  <div
+    className={`p-4 rounded-xl transition duration-300 bg-white hover:bg-indigo-50/50 flex flex-col items-center text-center border border-gray-100 ${className}`}
+  >
     <div
       className={`w-10 h-10 flex items-center justify-center rounded-lg ${iconBgColor} flex-shrink-0 mb-2`}
     >
@@ -45,23 +47,27 @@ const StatCard = ({
 );
 
 // --- Count Input Card Component ---
-const CountInputCard = ({ 
-  icon: Icon, 
-  label, 
-  value, 
-  isEditing, 
-  onFieldChange, 
-  iconColor, 
-  iconBgColor, 
-  min, 
-  max, 
+const CountInputCard = ({
+  icon: Icon,
+  label,
+  value,
+  isEditing,
+  onFieldChange,
+  iconColor,
+  iconBgColor,
+  min,
+  max,
   error = false,
-  className = ""
+  className = "",
 }) => (
-  <div className={`p-4 rounded-xl transition duration-300 bg-white border ${
-    error ? 'border-red-300 bg-red-50' : 'border-gray-100 hover:bg-gray-50'
-  } flex flex-col items-center text-center ${className}`}>
-    <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${iconBgColor} flex-shrink-0 mb-2`}>
+  <div
+    className={`p-4 rounded-xl transition duration-300 bg-white border ${
+      error ? "border-red-300 bg-red-50" : "border-gray-100 hover:bg-gray-50"
+    } flex flex-col items-center text-center ${className}`}
+  >
+    <div
+      className={`w-10 h-10 flex items-center justify-center rounded-lg ${iconBgColor} flex-shrink-0 mb-2`}
+    >
       <Icon className={`text-xl ${iconColor}`} />
     </div>
     <div className="text-xs font-medium uppercase tracking-wider text-gray-500 mb-1">
@@ -74,7 +80,9 @@ const CountInputCard = ({
           value={value || 0}
           onChange={(e) => onFieldChange(e.target.value)}
           className={`w-full text-xl font-bold px-2 py-1 border rounded text-center ${
-            error ? 'border-red-500 text-red-700' : 'border-gray-300 text-gray-800'
+            error
+              ? "border-red-500 text-red-700"
+              : "border-gray-300 text-gray-800"
           }`}
           min={min}
           max={max}
@@ -84,7 +92,11 @@ const CountInputCard = ({
         )}
       </div>
     ) : (
-      <div className={`text-xl font-bold ${error ? 'text-red-600' : 'text-gray-800'}`}>
+      <div
+        className={`text-xl font-bold ${
+          error ? "text-red-600" : "text-gray-800"
+        }`}
+      >
         {value || 0}
       </div>
     )}
@@ -131,7 +143,7 @@ const ContactDetailItem = ({
               value={value || ""}
               onChange={(e) => handleChange(e.target.value)}
               className={`w-full px-3 py-2 border rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 ${
-                validationError ? 'border-red-500' : 'border-gray-300'
+                validationError ? "border-red-500" : "border-gray-300"
               }`}
               placeholder={placeholder}
             />
@@ -192,7 +204,7 @@ const EditableField = ({
           onChange={(e) => handleChange(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
         >
-          {options.map(option => (
+          {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
@@ -217,7 +229,7 @@ const EditableField = ({
             value={value || ""}
             onChange={(e) => handleChange(e.target.value)}
             className={`w-full px-3 py-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 ${
-              validationError ? 'border-red-500' : 'border-gray-300'
+              validationError ? "border-red-500" : "border-gray-300"
             }`}
             placeholder={placeholder}
             min={min}
@@ -248,35 +260,42 @@ const UserDetail = () => {
 
   //photo
   const [showPhotoModal, setShowPhotoModal] = useState(false);
-const [uploadingPhoto, setUploadingPhoto] = useState(false);
-const [selectedFile, setSelectedFile] = useState(null);
-const [photoPreview, setPhotoPreview] = useState("");
-const [photoError, setPhotoError] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState("");
+  const [photoError, setPhotoError] = useState("");
 
-
-
-    // 🔔 Send scan event when user opens via QR code
+  // 🔔 Send scan event when user opens via QR code
   useEffect(() => {
     if (!Member_ID) return;
 
-    axios.post("https://api.regeve.in/api/scan-event", { Member_ID })
+    axios
+      .post("https://api.regeve.in/api/scan-event", { Member_ID })
       .then(() => console.log("Scan event sent to backend"))
       .catch((err) => console.error("Scan event error:", err));
   }, [Member_ID]);
 
-
+  // Data Fetching
   // Data Fetching
   useEffect(() => {
     const loadMember = async () => {
       try {
         const response = await axios.get(
-          `https://api.regeve.in/api/event-forms/${Member_ID}`
+          `https://api.regeve.in/api/event-forms/${Member_ID}`,
+          {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            withCredentials: false,
+          }
         );
         const memberData = response.data?.data;
         setMember(memberData);
         setEditedMember(memberData);
       } catch (err) {
         console.error("Error fetching member data:", err);
+        // Fallback or error handling
       } finally {
         setLoading(false);
       }
@@ -286,45 +305,38 @@ const [photoError, setPhotoError] = useState("");
   }, [Member_ID]);
 
   // Helper Functions
+  // Helper Functions
   const getFieldValue = (fieldName) => {
     return isEditing ? editedMember?.[fieldName] : member?.[fieldName];
   };
 
-  // UPDATED: Total guests now includes meal counts
-   const getTotalGuests = () => {
-  const adults = parseInt(getFieldValue("Adult_Count") || 0);
-  const children = parseInt(getFieldValue("Children_Count") || 0);
-  const veg = parseInt(getFieldValue("Veg_Count") || 0);
-  const nonVeg = parseInt(getFieldValue("Non_Veg_Count") || 0);
-  
-  // Return the sum of all counts (adults + children + veg + nonVeg)
-  return adults + children + veg + nonVeg;
-};
+  // FIXED: Total guests calculation
+  const getTotalGuests = () => {
+    const adults = parseInt(getFieldValue("Adult_Count") || 0);
+    const children = parseInt(getFieldValue("Children_Count") || 0);
+    return adults + children; // ✅ This is correct
+  };
 
+  // ADD THIS MISSING FUNCTION
   const getTotalMeals = () => {
     const veg = parseInt(getFieldValue("Veg_Count") || 0);
     const nonVeg = parseInt(getFieldValue("Non_Veg_Count") || 0);
     return veg + nonVeg;
   };
 
-  const getPartySize = () => {
-    const adults = parseInt(getFieldValue("Adult_Count") || 0);
-    const children = parseInt(getFieldValue("Children_Count") || 0);
-    return adults + children;
-  };
-
+  // FIXED: Use getTotalGuests() instead of getPartySize()
   const hasMealCountErrors = () => {
-    const partySize = getPartySize();
+    const totalGuests = getTotalGuests(); // ✅ Use the actual total
     const totalMeals = getTotalMeals();
-    return totalMeals > partySize;
+    return totalMeals > totalGuests;
   };
 
   const getMealValidationStatus = () => {
-    const partySize = getPartySize();
+    const totalGuests = getTotalGuests(); // ✅ Use the actual total
     const totalMeals = getTotalMeals();
-    
-    if (totalMeals > partySize) return "error";
-    if (totalMeals === partySize) return "success";
+
+    if (totalMeals > totalGuests) return "error";
+    if (totalMeals === totalGuests) return "success";
     return "warning";
   };
 
@@ -333,8 +345,8 @@ const [photoError, setPhotoError] = useState("");
     if (!value) return { isValid: true };
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
     return {
-      isValid: phoneRegex.test(value.replace(/[\s\-\(\)]/g, '')),
-      message: "Please enter a valid phone number"
+      isValid: phoneRegex.test(value.replace(/[\s\-\(\)]/g, "")),
+      message: "Please enter a valid phone number",
     };
   };
 
@@ -343,7 +355,7 @@ const [photoError, setPhotoError] = useState("");
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return {
       isValid: emailRegex.test(value),
-      message: "Please enter a valid email address"
+      message: "Please enter a valid email address",
     };
   };
 
@@ -352,7 +364,7 @@ const [photoError, setPhotoError] = useState("");
     const age = parseInt(value);
     return {
       isValid: age >= 0 && age <= 120,
-      message: "Age must be between 0 and 120"
+      message: "Age must be between 0 and 120",
     };
   };
 
@@ -360,7 +372,7 @@ const [photoError, setPhotoError] = useState("");
     if (!value) return { isValid: true };
     return {
       isValid: value.length >= 2 && value.length <= 20,
-      message: "Company ID must be between 2-20 characters"
+      message: "Company ID must be between 2-20 characters",
     };
   };
 
@@ -405,108 +417,113 @@ const [photoError, setPhotoError] = useState("");
   };
 
   const handlePhotoClick = () => {
-  if (isEditing) {
-    setShowPhotoModal(true);
-    setPhotoError("");
-    setSelectedFile(null);
-    setPhotoPreview("");
-  }
-};
-
-const handleFileSelect = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  if (!file.type.startsWith("image/")) {
-    setPhotoError("Please select a valid image file (JPEG, PNG)");
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    setPhotoError("File must be less than 5MB");
-    return;
-  }
-
-  setSelectedFile(file);
-  setPhotoError("");
-
-  const reader = new FileReader();
-  reader.onload = (e) => setPhotoPreview(e.target.result);
-  reader.readAsDataURL(file);
-};
-
-const handleUploadPhoto = async () => {
-  if (!selectedFile) {
-    setPhotoError("Please select a file first");
-    return;
-  }
-
-  setUploadingPhoto(true);
-  setPhotoError("");
-
-  try {
-    const fileExtension = selectedFile.name.split(".").pop();
-    const customFileName = `${Member_ID}_${member.Name}.${fileExtension}`;
-
-    const customFile = new File([selectedFile], customFileName, {
-      type: selectedFile.type,
-    });
-
-    const formData = new FormData();
-    formData.append("files", customFile);
-
-    const uploadResponse = await axios.post(
-      "https://api.regeve.in/api/upload/",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-
-    if (uploadResponse.data && uploadResponse.data[0]) {
-      const uploadedFile = uploadResponse.data[0];
-
-      await axios.put(
-        `https://api.regeve.in/api/event-forms/${Member_ID}`,
-        { data: { Photo: uploadedFile.id } },
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      const refreshResponse = await axios.get(
-        `https://api.regeve.in/api/event-forms/${Member_ID}`
-      );
-
-      const updatedMemberData = refreshResponse.data?.data;
-      setMember(updatedMemberData);
-      setEditedMember(updatedMemberData);
-      setImageError(false);
-
-      setShowPhotoModal(false);
+    if (isEditing) {
+      setShowPhotoModal(true);
+      setPhotoError("");
       setSelectedFile(null);
       setPhotoPreview("");
-
-      alert("Photo updated successfully!");
     }
-  } catch (error) {
-    console.error(error);
-    setPhotoError("Failed to upload. Try again.");
-  } finally {
-    setUploadingPhoto(false);
-  }
-};
+  };
 
-const handleCloseModal = () => {
-  setShowPhotoModal(false);
-  setSelectedFile(null);
-  setPhotoPreview("");
-  setPhotoError("");
-};
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      setPhotoError("Please select a valid image file (JPEG, PNG)");
+      return;
+    }
 
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError("File must be less than 5MB");
+      return;
+    }
+
+    setSelectedFile(file);
+    setPhotoError("");
+
+    const reader = new FileReader();
+    reader.onload = (e) => setPhotoPreview(e.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleUploadPhoto = async () => {
+    if (!selectedFile) {
+      setPhotoError("Please select a file first");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    setPhotoError("");
+
+    try {
+      const fileExtension = selectedFile.name.split(".").pop();
+      const customFileName = `${Member_ID}_${member.Name}.${fileExtension}`;
+
+      const customFile = new File([selectedFile], customFileName, {
+        type: selectedFile.type,
+      });
+
+      const formData = new FormData();
+      formData.append("files", customFile);
+
+      const uploadResponse = await axios.post(
+        "https://api.regeve.in/api/upload/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (uploadResponse.data && uploadResponse.data[0]) {
+        const uploadedFile = uploadResponse.data[0];
+
+        await axios.put(
+          `https://api.regeve.in/api/event-forms/${Member_ID}`,
+          { data: { Photo: uploadedFile.id } },
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        const refreshResponse = await axios.get(
+          `https://api.regeve.in/api/event-forms/${Member_ID}`
+        );
+
+        const updatedMemberData = refreshResponse.data?.data;
+        setMember(updatedMemberData);
+        setEditedMember(updatedMemberData);
+        setImageError(false);
+
+        setShowPhotoModal(false);
+        setSelectedFile(null);
+
+        setPhotoPreview("");
+
+        alert("Photo updated successfully!");
+      }
+    } catch (error) {
+      console.error(error);
+      setPhotoError("Failed to upload. Try again.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowPhotoModal(false);
+    setSelectedFile(null);
+    setPhotoPreview("");
+    setPhotoError("");
+  };
 
   const handleFieldChange = (fieldName, value) => {
+    if (fieldName === "IsPresent") {
+      if (!editedMember?.IsVerified_Member && value === true) {
+        alert("Only verified members can be marked as Present.");
+        return; // stop update
+      }
+    }
     // Convert numeric fields to numbers immediately
     let finalValue = value;
     if (
@@ -529,36 +546,39 @@ const handleCloseModal = () => {
 
   const validateAllFields = () => {
     const errors = {};
-    
+
     // Phone validation
     if (editedMember.Phone_Number) {
       const phoneValidation = validatePhoneNumber(editedMember.Phone_Number);
-      if (!phoneValidation.isValid) errors.Phone_Number = phoneValidation.message;
+      if (!phoneValidation.isValid)
+        errors.Phone_Number = phoneValidation.message;
     }
-    
+
     // Email validation
     if (editedMember.Email) {
       const emailValidation = validateEmail(editedMember.Email);
       if (!emailValidation.isValid) errors.Email = emailValidation.message;
     }
-    
+
     // Age validation
     if (editedMember.Age) {
       const ageValidation = validateAge(editedMember.Age);
       if (!ageValidation.isValid) errors.Age = ageValidation.message;
     }
-    
+
     // Company ID validation
     if (editedMember.Company_ID) {
       const companyValidation = validateCompanyId(editedMember.Company_ID);
-      if (!companyValidation.isValid) errors.Company_ID = companyValidation.message;
+      if (!companyValidation.isValid)
+        errors.Company_ID = companyValidation.message;
     }
-    
+
+    // Meal count validation
     // Meal count validation
     if (hasMealCountErrors()) {
-      errors.MealCount = "Total meals exceed party size";
+      errors.MealCount = "Total meals exceed total guests"; // Updated message
     }
-    
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -588,7 +608,6 @@ const handleCloseModal = () => {
         Non_Veg_Count: editedMember.Non_Veg_Count,
         Company_ID: editedMember.Company_ID?.trim(),
         IsPresent: editedMember.IsPresent,
-
       };
 
       // Remove undefined and empty strings for optional fields
@@ -662,450 +681,482 @@ const handleCloseModal = () => {
   const mealStatus = getMealValidationStatus();
   const totalGuests = getTotalGuests();
   const totalMeals = getTotalMeals();
-  const partySize = getPartySize();
 
   return (
-   <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-  <div className="max-w-6xl mx-auto">
-    {/* PROFILE HEADER & ACTIONS */}
-    <div className="bg-white rounded-3xl shadow-2xl p-6 mb-8 border border-gray-100">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-        {/* Image & Main Info */}
-        <div className="flex items-center gap-6 flex-1 min-w-0">
-          {/* Profile Image/Placeholder */}
-          <div className="flex-shrink-0">
-
-            {/* ⭐ CLICKABLE WHEN EDITING (NO OTHER CHANGE) */}
-            <div
-              className={isEditing ? "cursor-pointer inline-block" : "inline-block"}
-              onClick={isEditing ? handlePhotoClick : undefined}
-            >
-              {member.Photo?.url && !imageError ? (
-                <img
-                  src={`https://api.regeve.in${member.Photo.url}`}
-                  alt="Profile"
-                  className="w-28 h-28 object-cover rounded-full border-4 border-indigo-200 shadow-md"
-                  onError={() => setImageError(true)}
-                />
-              ) : (
-                <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center border-4 border-indigo-200 shadow-md">
-                  <FaUser className="text-4xl text-gray-500" />
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        {/* PROFILE HEADER & ACTIONS */}
+        <div className="bg-white rounded-3xl shadow-2xl p-6 mb-8 border border-gray-100">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+            {/* Image & Main Info */}
+            <div className="flex items-center gap-6 flex-1 min-w-0">
+              {/* Profile Image/Placeholder */}
+              <div className="flex-shrink-0">
+                {/* ⭐ CLICKABLE WHEN EDITING (NO OTHER CHANGE) */}
+                <div
+                  className={
+                    isEditing ? "cursor-pointer inline-block" : "inline-block"
+                  }
+                  onClick={isEditing ? handlePhotoClick : undefined}
+                >
+                  {member.Photo?.url && !imageError ? (
+                    <img
+                      src={`https://api.regeve.in${member.Photo.url}`}
+                      alt="Profile"
+                      className="w-28 h-28 object-cover rounded-full border-4 border-indigo-200 shadow-md"
+                      onError={() => setImageError(true)}
+                    />
+                  ) : (
+                    <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center border-4 border-indigo-200 shadow-md">
+                      <FaUser className="text-4xl text-gray-500" />
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Name and Meta */}
+              <div className="min-w-0">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 truncate mb-1">
+                  {isEditing && (
+                    <div className="py-3 border-b border-gray-100 flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-500">
+                        Mark as Present
+                      </label>
+
+                      <label className="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editedMember?.IsPresent || false}
+                          disabled={!editedMember?.IsVerified_Member} // ⛔ disable when not verified
+                          onChange={(e) =>
+                            handleFieldChange("IsPresent", e.target.checked)
+                          }
+                          className="hidden"
+                        />
+
+                        <div
+                          className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ${
+                            editedMember?.IsPresent
+                              ? "bg-green-500"
+                              : "bg-gray-300"
+                          } ${
+                            !editedMember?.IsVerified_Member
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                        >
+                          <div
+                            className={`bg-white w-6 h-6 rounded-full shadow-md transform duration-300 ${
+                              editedMember?.IsPresent ? "translate-x-7" : ""
+                            }`}
+                          ></div>
+                        </div>
+                      </label>
+
+                      {!editedMember?.IsVerified_Member && (
+                        <p className="text-xs text-red-600 mt-1">
+                          User is not verified by admin
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editedMember?.Name || ""}
+                      onChange={(e) =>
+                        handleFieldChange("Name", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-2xl sm:text-3xl font-extrabold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Member Name"
+                    />
+                  ) : (
+                    <>
+                      {member.Name}
+                      {member.IsPresent && (
+                        <span className="text-green-600 text-2xl">✔</span>
+                      )}
+                    </>
+                  )}
+                </h1>
+
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 font-medium">
+                  <span className="flex items-center gap-1.5">
+                    <FaBuilding className="text-indigo-500 text-xs" />
+                    {member.Company_ID || "N/A"}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <FaInfoCircle className="text-indigo-500 text-xs" />
+                    ID: {Member_ID}
+                  </span>
+                  <span className="px-3 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                    Registered
+                  </span>
+                </div>
+              </div>
             </div>
 
+            {/* Action Buttons */}
+            <div className="flex flex-shrink-0 gap-3 w-full lg:w-auto mt-4 lg:mt-0 justify-end">
+              <button
+                onClick={handleShare}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl font-semibold hover:bg-indigo-600 transition-all duration-300 shadow-lg"
+                title="Share Profile via WhatsApp"
+              >
+                <FaShareAlt />
+                <span className="hidden sm:inline">Share</span>
+              </button>
+
+              <div className="hidden lg:flex flex-shrink-0 gap-3 w-full lg:w-auto mt-4 lg:mt-0 justify-end">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-all duration-300 shadow-lg disabled:opacity-50"
+                      title="Save Changes"
+                    >
+                      <FaSave />
+                      {saving ? "Saving..." : "Save"}
+                    </button>
+
+                    <button
+                      onClick={handleEditToggle}
+                      className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-xl font-semibold hover:bg-gray-700 transition-all duration-300 shadow-lg"
+                      title="Cancel Editing"
+                    >
+                      <FaTimes />
+                      <span className="hidden sm:inline">Cancel</span>
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={handleEditToggle}
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all duration-300 shadow-lg"
+                    title="Edit Profile"
+                  >
+                    <FaEdit />
+                    <span className="hidden sm:inline">Edit</span>
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
+        </div>
 
-          {/* Name and Meta */}
-          <div className="min-w-0">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 truncate mb-1">
+        {/* MAIN CONTENT GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* LEFT SIDE */}
+          <div className="lg:col-span-1 space-y-8">
+            {/* Guest & Meal Count */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <FaUsers className="mr-3 text-indigo-600" />
+                Party & Meal Count
+              </h2>
 
-              {isEditing && (
-                <div className="py-3 border-b border-gray-100 flex items-center justify-between">
-                  <label className="text-sm font-medium text-gray-500">
-                    Mark as Present
-                  </label>
+              {isEditing && hasMealCountErrors() && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                  <FaExclamationTriangle className="text-red-500 flex-shrink-0" />
+                  <p className="text-sm text-red-600 font-medium">
+                    Meal counts exceed party size
+                  </p>
+                </div>
+              )}
 
-                  <label className="inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editedMember?.IsPresent || false}
-                      onChange={(e) =>
-                        handleFieldChange("IsPresent", e.target.checked)
-                      }
-                      className="hidden"
-                    />
-                    <div
-                      className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ${
-                        editedMember?.IsPresent ? "bg-green-500" : "bg-gray-300"
+              <div className="grid grid-cols-2 gap-4">
+                <CountInputCard
+                  icon={FaUsers}
+                  iconColor="text-teal-600"
+                  iconBgColor="bg-teal-100"
+                  label="Adults"
+                  value={getFieldValue("Adult_Count")}
+                  isEditing={isEditing}
+                  onFieldChange={(value) =>
+                    handleFieldChange("Adult_Count", value)
+                  }
+                  min="0"
+                  max="50"
+                />
+
+                <CountInputCard
+                  icon={FaChild}
+                  iconColor="text-teal-600"
+                  iconBgColor="bg-teal-100"
+                  label="Children"
+                  value={getFieldValue("Children_Count")}
+                  isEditing={isEditing}
+                  onFieldChange={(value) =>
+                    handleFieldChange("Children_Count", value)
+                  }
+                  min="0"
+                  max="50"
+                />
+
+                <CountInputCard
+                  icon={FaUtensils}
+                  iconColor="text-green-600"
+                  iconBgColor="bg-green-100"
+                  label="Veg Meals"
+                  value={getFieldValue("Veg_Count")}
+                  isEditing={isEditing}
+                  onFieldChange={(value) =>
+                    handleFieldChange("Veg_Count", value)
+                  }
+                  min="0"
+                  max={totalGuests}
+                  error={getFieldValue("Veg_Count") > totalGuests}
+                />
+
+                <CountInputCard
+                  icon={FaUtensils}
+                  iconColor="text-red-600"
+                  iconBgColor="bg-red-100"
+                  label="Non-Veg Meals"
+                  value={getFieldValue("Non_Veg_Count")}
+                  isEditing={isEditing}
+                  onFieldChange={(value) =>
+                    handleFieldChange("Non_Veg_Count", value)
+                  }
+                  min="0"
+                  max={totalGuests}
+                  error={getFieldValue("Non_Veg_Count") > totalGuests}
+                />
+
+                <div className="col-span-2 mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    {" "}
+                    {/* Changed to 2 columns */}
+                    {/* Total Guests */}
+                    <div className="text-center">
+                      <div className="text-gray-600 font-medium mb-1">
+                        Total Guests
+                      </div>
+                      <div className="font-bold text-purple-600">
+                        {totalGuests}
+                      </div>
+                    </div>
+                    {/* Total Meals */}
+                    <div className="text-center">
+                      <div className="text-gray-600 font-medium mb-1">
+                        Total Meals
+                      </div>
+                      <div
+                        className={`font-bold ${
+                          mealStatus === "error"
+                            ? "text-red-600"
+                            : mealStatus === "success"
+                            ? "text-green-600"
+                            : "text-amber-600"
+                        }`}
+                      >
+                        {totalMeals}
+                      </div>
+                    </div>
+                  </div>
+
+                  {mealStatus !== "success" && (
+                    <p
+                      className={`text-xs mt-2 text-center ${
+                        mealStatus === "error"
+                          ? "text-red-600"
+                          : "text-amber-600"
                       }`}
                     >
-                      <div
-                        className={`bg-white w-6 h-6 rounded-full shadow-md transform duration-300 ${
-                          editedMember?.IsPresent ? "translate-x-7" : ""
-                        }`}
-                      ></div>
-                    </div>
-                  </label>
-                </div>
-              )}
-
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={editedMember?.Name || ""}
-                  onChange={(e) =>
-                    handleFieldChange("Name", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-2xl sm:text-3xl font-extrabold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Member Name"
-                />
-              ) : (
-                <>
-                  {member.Name}
-                  {member.IsPresent && (
-                    <span className="text-green-600 text-2xl">✔</span>
+                      {mealStatus === "error"
+                        ? "Meals exceed total guests!"
+                        : "Meals don't match total guests"}
+                    </p>
                   )}
-                </>
-              )}
-            </h1>
-
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 font-medium">
-              <span className="flex items-center gap-1.5">
-                <FaBuilding className="text-indigo-500 text-xs" />
-                {member.Company_ID || "N/A"}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <FaInfoCircle className="text-indigo-500 text-xs" />
-                ID: {Member_ID}
-              </span>
-              <span className="px-3 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-                Registered
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-shrink-0 gap-3 w-full lg:w-auto mt-4 lg:mt-0 justify-end">
-          <button
-            onClick={handleShare}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl font-semibold hover:bg-indigo-600 transition-all duration-300 shadow-lg"
-            title="Share Profile via WhatsApp"
-          >
-            <FaShareAlt />
-            <span className="hidden sm:inline">Share</span>
-          </button>
-
-          {isEditing ? (
-            <>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-all duration-300 shadow-lg disabled:opacity-50"
-                title="Save Changes"
-              >
-                <FaSave />
-                {saving ? "Saving..." : "Save"}
-              </button>
-
-              <button
-                onClick={handleEditToggle}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-xl font-semibold hover:bg-gray-700 transition-all duration-300 shadow-lg"
-                title="Cancel Editing"
-              >
-                <FaTimes />
-                <span className="hidden sm:inline">Cancel</span>
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={handleEditToggle}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all duration-300 shadow-lg"
-              title="Edit Profile"
-            >
-              <FaEdit />
-              <span className="hidden sm:inline">Edit</span>
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-
-    {/* MAIN CONTENT GRID */}
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* LEFT SIDE */}
-      <div className="lg:col-span-1 space-y-8">
-        {/* Guest & Meal Count */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <FaUsers className="mr-3 text-indigo-600" />
-            Party & Meal Count
-          </h2>
-
-          {isEditing && hasMealCountErrors() && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
-              <FaExclamationTriangle className="text-red-500 flex-shrink-0" />
-              <p className="text-sm text-red-600 font-medium">
-                Meal counts exceed party size
-              </p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            
-
-            <CountInputCard
-              icon={FaUsers}
-              iconColor="text-teal-600"
-              iconBgColor="bg-teal-100"
-              label="Adults"
-              value={getFieldValue("Adult_Count")}
-              isEditing={isEditing}
-              onFieldChange={(value) => handleFieldChange("Adult_Count", value)}
-              min="0"
-              max="50"
-            />
-
-            <CountInputCard
-              icon={FaChild}
-              iconColor="text-teal-600"
-              iconBgColor="bg-teal-100"
-              label="Children"
-              value={getFieldValue("Children_Count")}
-              isEditing={isEditing}
-              onFieldChange={(value) => handleFieldChange("Children_Count", value)}
-              min="0"
-              max="50"
-            />
-
-            <CountInputCard
-              icon={FaUtensils}
-              iconColor="text-green-600"
-              iconBgColor="bg-green-100"
-              label="Veg Meals"
-              value={getFieldValue("Veg_Count")}
-              isEditing={isEditing}
-              onFieldChange={(value) => handleFieldChange("Veg_Count", value)}
-              min="0"
-              max={partySize}
-              error={getFieldValue("Veg_Count") > partySize}
-            />
-
-            <CountInputCard
-              icon={FaUtensils}
-              iconColor="text-red-600"
-              iconBgColor="bg-red-100"
-              label="Non-Veg Meals"
-              value={getFieldValue("Non_Veg_Count")}
-              isEditing={isEditing}
-              onFieldChange={(value) => handleFieldChange("Non_Veg_Count", value)}
-              min="0"
-              max={partySize}
-              error={getFieldValue("Non_Veg_Count") > partySize}
-            />
-
-            <div className="col-span-2 mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="text-center">
-                  <div className="text-gray-600 font-medium mb-1">Party Size</div>
-                  <div className="font-bold text-blue-600">{partySize}</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="text-gray-600 font-medium mb-1">Total Meals</div>
-                  <div
-                    className={`font-bold ${
-                      mealStatus === "error"
-                        ? "text-red-600"
-                        : mealStatus === "success"
-                        ? "text-green-600"
-                        : "text-amber-600"
-                    }`}
-                  >
-                    {totalMeals}
-                  </div>
                 </div>
               </div>
+            </div>
 
-              {mealStatus !== "success" && (
-                <p
-                  className={`text-xs mt-2 text-center ${
-                    mealStatus === "error" ? "text-red-600" : "text-amber-600"
-                  }`}
-                >
-                  {mealStatus === "error"
-                    ? "Meals exceed party size!"
-                    : "Meals don't match party size"}
-                </p>
-              )}
+            {/* Personal Info */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <FaUser className="mr-3 text-indigo-600" />
+                Personal Details
+              </h2>
+
+              <div className="space-y-4">
+                <EditableField
+                  label="Age"
+                  value={getFieldValue("Age")}
+                  fieldName="Age"
+                  isEditing={isEditing}
+                  onFieldChange={handleFieldChange}
+                  type="number"
+                  placeholder="Enter age"
+                  min="0"
+                  max="120"
+                  validation={validateAge}
+                />
+
+                <EditableField
+                  label="Gender"
+                  value={getFieldValue("Gender")}
+                  fieldName="Gender"
+                  isEditing={isEditing}
+                  onFieldChange={handleFieldChange}
+                  options={[
+                    { value: "", label: "Select gender" },
+                    { value: "Male", label: "Male" },
+                    { value: "Female", label: "Female" },
+                    { value: "Other", label: "Other" },
+                  ]}
+                />
+
+                <EditableField
+                  label="Company ID"
+                  value={getFieldValue("Company_ID")}
+                  fieldName="Company_ID"
+                  isEditing={isEditing}
+                  onFieldChange={handleFieldChange}
+                  placeholder="Enter Company ID"
+                  validation={validateCompanyId}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Personal Info */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <FaUser className="mr-3 text-indigo-600" />
-            Personal Details
-          </h2>
+          {/* RIGHT SIDE */}
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+              <FaPhoneAlt className="mr-3 text-indigo-600" />
+              Contact Information
+            </h2>
 
-          <div className="space-y-4">
-            <EditableField
-              label="Age"
-              value={getFieldValue("Age")}
-              fieldName="Age"
-              isEditing={isEditing}
-              onFieldChange={handleFieldChange}
-              type="number"
-              placeholder="Enter age"
-              min="0"
-              max="120"
-              validation={validateAge}
-            />
-
-            <EditableField
-              label="Gender"
-              value={getFieldValue("Gender")}
-              fieldName="Gender"
-              isEditing={isEditing}
-              onFieldChange={handleFieldChange}
-              options={[
-                { value: "", label: "Select gender" },
-                { value: "Male", label: "Male" },
-                { value: "Female", label: "Female" },
-                { value: "Other", label: "Other" },
-              ]}
-            />
-
-            <EditableField
-              label="Company ID"
-              value={getFieldValue("Company_ID")}
-              fieldName="Company_ID"
-              isEditing={isEditing}
-              onFieldChange={handleFieldChange}
-              placeholder="Enter Company ID"
-              validation={validateCompanyId}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* RIGHT SIDE */}
-      <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-          <FaPhoneAlt className="mr-3 text-indigo-600" />
-          Contact Information
-        </h2>
-
-        <div className="space-y-1">
-          <ContactDetailItem
-            icon={FaPhoneAlt}
-            label="Phone Number"
-            value={getFieldValue("Phone_Number")}
-            onClick={() => handleCall(getFieldValue("Phone_Number"))}
-            buttonText="Call"
-            iconColor="text-indigo-600"
-            isEditing={isEditing}
-            fieldName="Phone_Number"
-            onFieldChange={handleFieldChange}
-            type="tel"
-            placeholder="+1 (555) 123-4567"
-            validation={validatePhoneNumber}
-            actionDisabled={!getFieldValue("Phone_Number")}
-          />
-
-          <ContactDetailItem
-            icon={FaWhatsapp}
-            label="WhatsApp Number"
-            value={getFieldValue("WhatsApp_Number")}
-            onClick={() => handleWhatsApp(getFieldValue("WhatsApp_Number"))}
-            buttonText="WhatsApp"
-            iconColor="text-green-600"
-            isEditing={isEditing}
-            fieldName="WhatsApp_Number"
-            onFieldChange={handleFieldChange}
-            type="tel"
-            placeholder="+1 (555) 123-4567"
-            validation={validatePhoneNumber}
-            actionDisabled={!getFieldValue("WhatsApp_Number")}
-          />
-
-          <ContactDetailItem
-            icon={FaEnvelope}
-            label="Email Address"
-            value={getFieldValue("Email")}
-            onClick={() => handleEmail(getFieldValue("Email"))}
-            buttonText="Email"
-            iconColor="text-indigo-600"
-            isEditing={isEditing}
-            fieldName="Email"
-            onFieldChange={handleFieldChange}
-            type="email"
-            placeholder="name@company.com"
-            validation={validateEmail}
-            actionDisabled={!getFieldValue("Email")}
-          />
-
-          <ContactDetailItem
-            icon={FaMapMarkerAlt}
-            label="Address"
-            value={getFieldValue("Address")}
-            iconColor="text-indigo-600"
-            isEditing={isEditing}
-            fieldName="Address"
-            onFieldChange={handleFieldChange}
-            type="text"
-            placeholder="Enter full address"
-            actionDisabled={true}
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {/* ⭐ PHOTO UPLOAD MODAL (ADDED — NOTHING ELSE CHANGED) */}
-  {showPhotoModal && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-800">Upload Profile Photo</h3>
-          <button
-            onClick={handleCloseModal}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <FaTimes className="text-xl" />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex justify-center">
-            {photoPreview ? (
-              <img
-                src={photoPreview}
-                alt="Preview"
-                className="w-32 h-32 object-cover rounded-full border-4 border-indigo-200"
+            <div className="space-y-1">
+              <ContactDetailItem
+                icon={FaPhoneAlt}
+                label="Phone Number"
+                value={getFieldValue("Phone_Number")}
+                onClick={() => handleCall(getFieldValue("Phone_Number"))}
+                buttonText="Call"
+                iconColor="text-indigo-600"
+                isEditing={isEditing}
+                fieldName="Phone_Number"
+                onFieldChange={handleFieldChange}
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                validation={validatePhoneNumber}
+                actionDisabled={!getFieldValue("Phone_Number")}
               />
-            ) : (
-              <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-indigo-200">
-                <FaUser className="text-3xl text-gray-500" />
-              </div>
-            )}
-          </div>
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-          />
+              <ContactDetailItem
+                icon={FaWhatsapp}
+                label="WhatsApp Number"
+                value={getFieldValue("WhatsApp_Number")}
+                onClick={() => handleWhatsApp(getFieldValue("WhatsApp_Number"))}
+                buttonText="WhatsApp"
+                iconColor="text-green-600"
+                isEditing={isEditing}
+                fieldName="WhatsApp_Number"
+                onFieldChange={handleFieldChange}
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                validation={validatePhoneNumber}
+                actionDisabled={!getFieldValue("WhatsApp_Number")}
+              />
 
-          {photoError && (
-            <p className="text-red-600 text-sm">{photoError}</p>
-          )}
+              <ContactDetailItem
+                icon={FaEnvelope}
+                label="Email Address"
+                value={getFieldValue("Email")}
+                onClick={() => handleEmail(getFieldValue("Email"))}
+                buttonText="Email"
+                iconColor="text-indigo-600"
+                isEditing={isEditing}
+                fieldName="Email"
+                onFieldChange={handleFieldChange}
+                type="email"
+                placeholder="name@company.com"
+                validation={validateEmail}
+                actionDisabled={!getFieldValue("Email")}
+              />
 
-          <div className="flex gap-3 pt-4">
-            <button
-              onClick={handleCloseModal}
-              className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={handleUploadPhoto}
-              disabled={!selectedFile || uploadingPhoto}
-              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:opacity-50"
-            >
-              {uploadingPhoto ? "Uploading..." : "Upload Photo"}
-            </button>
+              <ContactDetailItem
+                icon={FaMapMarkerAlt}
+                label="Address"
+                value={getFieldValue("Address")}
+                iconColor="text-indigo-600"
+                isEditing={isEditing}
+                fieldName="Address"
+                onFieldChange={handleFieldChange}
+                type="text"
+                placeholder="Enter full address"
+                actionDisabled={true}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  )}
-</div>
 
+      {/* ⭐ PHOTO UPLOAD MODAL (ADDED — NOTHING ELSE CHANGED) */}
+      {showPhotoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-800">
+                Upload Profile Photo
+              </h3>
+              <button
+                onClick={handleCloseModal}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex justify-center">
+                {photoPreview ? (
+                  <img
+                    src={photoPreview}
+                    alt="Preview"
+                    className="w-32 h-32 object-cover rounded-full border-4 border-indigo-200"
+                  />
+                ) : (
+                  <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-indigo-200">
+                    <FaUser className="text-3xl text-gray-500" />
+                  </div>
+                )}
+              </div>
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+
+              {photoError && (
+                <p className="text-red-600 text-sm">{photoError}</p>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleCloseModal}
+                  className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleUploadPhoto}
+                  disabled={!selectedFile || uploadingPhoto}
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:opacity-50"
+                >
+                  {uploadingPhoto ? "Uploading..." : "Upload Photo"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

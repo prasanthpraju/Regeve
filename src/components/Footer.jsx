@@ -77,19 +77,19 @@ const Footer = () => {
   const contactInfo = [
     {
       icon: MapPin,
-      text: '123 Event Street, San Francisco, CA 94105',
+      text: '243/3, Arcot Rd, Vadapalani, Chennai, Tamil Nadu 600026',
       gradient: 'hover:text-green-600'
     },
     {
       icon: Phone,
-      text: '+1 (555) 123-4567',
-      href: 'tel:+15551234567',
+      text: '+91 9884030207',
+      href: 'tel:+919884030207',
       gradient: 'hover:text-blue-600'
     },
     {
       icon: Mail,
-      text: 'hello@regeve.com',
-      href: 'mailto:hello@regeve.com',
+      text: 'regeveindia@gmail.com',
+      href: 'mailto:regeveindia@gmail.com',
       gradient: 'hover:text-purple-600'
     }
   ];

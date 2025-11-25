@@ -177,13 +177,6 @@ const ProfilePopup = ({ isOpen, onClose, userData, luckyNumber }) => {
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-2 bg-slate-700/30 rounded-lg">
-                    <span className="text-blue-400 font-medium">Family</span>
-                    <div className="flex items-center gap-2">
-                      <FaUsers className="text-teal-400" />
-                      <span className="text-slate-300">{userData.familyMembers}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between p-2 bg-slate-700/30 rounded-lg">
                     <span className="text-blue-400 font-medium">Gender</span>
                     <div className="flex items-center gap-2">
                       <FaUser className="text-purple-400" />

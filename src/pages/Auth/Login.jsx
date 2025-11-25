@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { X, Mail, Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
 import Img1 from "../../assets/Auth.jpg";
+import { useNavigate } from "react-router-dom";
 
 const Login = ({ onClose, onSwitchToRegister, onLoginSuccess }) => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const Login = ({ onClose, onSwitchToRegister, onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [apiError, setApiError] = useState("");
+  const navigate = useNavigate();
 
   // ------------------------
   // FORM VALIDATION
@@ -81,8 +83,8 @@ const Login = ({ onClose, onSwitchToRegister, onLoginSuccess }) => {
 
         // Close after animation
         setTimeout(() => {
-          onLoginSuccess?.(data.login);
           onClose();
+          navigate("/dashboard");
         }, 2000);
       } else {
         setApiError(data.message || "Invalid email or password");

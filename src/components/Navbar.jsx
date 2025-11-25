@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
   LogIn,
@@ -7,33 +7,33 @@ import {
   X,
   LogOut,
   CheckCircle,
-  XCircle
-} from 'lucide-react';
-import Login from '../pages/Auth/Login';
+  XCircle,
+} from "lucide-react";
+import Login from "../pages/Auth/Login";
 import { useNavigate } from "react-router-dom";
-import Logo from "../assets/Logo.png"
+import Logo from "../assets/Logo.png";
 import axios from "axios";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authModal, setAuthModal] = useState({
     isOpen: false,
-    type: 'login' // 'login' or 'register'
+    type: "login", // 'login' or 'register'
   });
   const [toast, setToast] = useState({
     show: false,
-    message: '',
-    type: 'success' // 'success' or 'error'
+    message: "",
+    type: "success", // 'success' or 'error'
   });
 
-  const openLogin = () => setAuthModal({ isOpen: true, type: 'login' });
-  const closeAuth = () => setAuthModal({ isOpen: false, type: 'login' });
+  const openLogin = () => setAuthModal({ isOpen: true, type: "login" });
+  const closeAuth = () => setAuthModal({ isOpen: false, type: "login" });
 
-  const showToast = (message, type = 'success') => {
+  const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
     // Auto hide after 3 seconds
     setTimeout(() => {
-      setToast({ show: false, message: '', type: 'success' });
+      setToast({ show: false, message: "", type: "success" });
     }, 3000);
   };
 
@@ -50,14 +50,11 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      const storedUser = localStorage.getItem("userProfile");
-      const email = storedUser ? JSON.parse(storedUser).email : "";
-
       const token = localStorage.getItem("userToken");
 
-      const response = await axios.post(
+      await axios.post(
         "https://api.regeve.in/api/admin/logout",
-        { Email: email },   // remove this if API doesn't need email
+        {}, // backend usually doesn’t need email
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -65,33 +62,31 @@ const Navbar = () => {
         }
       );
 
-      console.log("Logout API Success:", response.data);
-
-      // Show success message
-      showToast('Logged out successfully!', 'success');
-
-      // Wait a moment for the toast to show, then proceed with logout
-      setTimeout(() => {
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("userToken");
-        localStorage.removeItem("userProfile");
-        window.location.reload();
-      }, 1000);
-
+      showToast("Logged out successfully!", "success");
     } catch (error) {
       console.error("Logout error:", error);
-      console.log("Server says:", error.response?.data);
-      
-      // Show error message
-      showToast('Logout failed. Please try again.', 'error');
+      showToast("Logout failed on server, but logging out locally.", "error");
+    } finally {
+      // ALWAYS log out user locally
+      localStorage.setItem("isLoggedIn", "false");
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("userProfile");
+
+      // Update UI instantly
+      navigate("/");
+
+      // Reload to reset protected components if needed
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
   };
 
   const navItems = [
-    { name: 'Home', path: "/" },
-    { name: 'About Us', path: "/about" },
-    { name: 'Contact', path: "/contact" },
-    ...(isLoggedIn ? [{ name: 'Dashboard', path: "/dashboard" }] : [])
+    { name: "Home", path: "/" },
+    { name: "About Us", path: "/about" },
+    { name: "Contact", path: "/contact" },
+    ...(isLoggedIn ? [{ name: "Dashboard", path: "/dashboard" }] : []),
   ];
 
   const menuVariants = {
@@ -100,35 +95,35 @@ const Navbar = () => {
       height: 0,
       transition: {
         duration: 0.3,
-        ease: "easeInOut"
-      }
+        ease: "easeInOut",
+      },
     },
     open: {
       opacity: 1,
       height: "auto",
       transition: {
         duration: 0.3,
-        ease: "easeInOut"
-      }
-    }
+        ease: "easeInOut",
+      },
+    },
   };
 
   const itemVariants = {
     closed: {
       opacity: 0,
-      y: -20
+      y: -20,
     },
     open: {
       opacity: 1,
-      y: 0
-    }
+      y: 0,
+    },
   };
 
   const toastVariants = {
     hidden: {
       opacity: 0,
       y: -100,
-      scale: 0.8
+      scale: 0.8,
     },
     visible: {
       opacity: 1,
@@ -137,17 +132,17 @@ const Navbar = () => {
       transition: {
         type: "spring",
         stiffness: 300,
-        damping: 25
-      }
+        damping: 25,
+      },
     },
     exit: {
       opacity: 0,
       y: -100,
       scale: 0.8,
       transition: {
-        duration: 0.2
-      }
-    }
+        duration: 0.2,
+      },
+    },
   };
 
   return (
@@ -165,11 +160,7 @@ const Navbar = () => {
             >
               <div className="relative">
                 <div className="flex items-center space-x-2">
-                  <img
-                    src={Logo}
-                    alt="Regeve Logo"
-                    className="w-20 h-15"
-                  />
+                  <img src={Logo} alt="Regeve Logo" className="w-20 h-15" />
                   <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                     REGEVE
                   </span>
@@ -214,7 +205,10 @@ const Navbar = () => {
                   <motion.button
                     onClick={handleLogout}
                     className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium shadow-sm"
-                    whileHover={{ scale: 1.05, shadow: "0 4px 12px rgba(239, 68, 68, 0.3)" }}
+                    whileHover={{
+                      scale: 1.05,
+                      shadow: "0 4px 12px rgba(239, 68, 68, 0.3)",
+                    }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <LogOut className="w-4 h-4" />
@@ -228,7 +222,10 @@ const Navbar = () => {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
-                  whileHover={{ scale: 1.05, shadow: "0 4px 12px rgba(37, 99, 235, 0.3)" }}
+                  whileHover={{
+                    scale: 1.05,
+                    shadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+                  }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <LogIn className="w-4 h-4" />
@@ -243,7 +240,11 @@ const Navbar = () => {
               onClick={toggleMenu}
               whileTap={{ scale: 0.95 }}
             >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </motion.button>
           </div>
 
@@ -283,7 +284,9 @@ const Navbar = () => {
                         >
                           <div className="flex items-center space-x-2">
                             <User className="w-4 h-4 text-blue-600" />
-                            <span className="text-blue-800 font-medium">{userName}</span>
+                            <span className="text-blue-800 font-medium">
+                              {userName}
+                            </span>
                           </div>
                         </motion.div>
                         <motion.button
@@ -331,12 +334,14 @@ const Navbar = () => {
             animate="visible"
             exit="exit"
           >
-            <div className={`flex items-center space-x-2 px-6 py-3 rounded-lg shadow-lg border ${
-              toast.type === 'success' 
-                ? 'bg-green-50 border-green-200 text-green-800' 
-                : 'bg-red-50 border-red-200 text-red-800'
-            }`}>
-              {toast.type === 'success' ? (
+            <div
+              className={`flex items-center space-x-2 px-6 py-3 rounded-lg shadow-lg border ${
+                toast.type === "success"
+                  ? "bg-green-50 border-green-200 text-green-800"
+                  : "bg-red-50 border-red-200 text-red-800"
+              }`}
+            >
+              {toast.type === "success" ? (
                 <CheckCircle className="w-5 h-5" />
               ) : (
                 <XCircle className="w-5 h-5" />
@@ -349,7 +354,7 @@ const Navbar = () => {
 
       {/* Auth Modals */}
       <AnimatePresence>
-        {authModal.isOpen && authModal.type === 'login' && (
+        {authModal.isOpen && authModal.type === "login" && (
           <Login
             onClose={closeAuth}
             onLoginSuccess={() => {

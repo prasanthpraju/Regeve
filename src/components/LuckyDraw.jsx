@@ -193,16 +193,18 @@ const LuckyDraw = () => {
   const fetchAllMembers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        "https://api.regeve.in/api/event-forms"
-      );
+      const response = await axios.get("https://api.regeve.in/api/event-forms");
       console.log("API Response:", response.data.data);
-      
+
       // Filter members who haven't won yet
-const eligible = response.data.data.filter((m) => {
-  const isWinner = m?.IsWinnned ?? m?.attributes?.IsWinnned ?? false;
-  return isWinner === false;
-});
+      const eligible = response.data.data.filter((m) => {
+        const present = m.IsPresent === true || m.IsPresent === "true";
+
+        // treat null as NOT won
+        const won = m.IsWinnned === true || m.IsWinnned === "true";
+
+        return present && !won;
+      });
 
       console.log("Eligible members:", eligible);
       setAllMembers(eligible);
@@ -215,20 +217,22 @@ const eligible = response.data.data.filter((m) => {
 
   const updateWinnerStatus = async (memberId) => {
     try {
-      const member = allMembers.find(m => m.Member_ID === memberId || m.Member_ID === memberId);
+      const member = allMembers.find(
+        (m) => m.Member_ID === memberId || m.Member_ID === memberId
+      );
       if (!member) {
         console.error("Member not found:", memberId);
         return false;
       }
 
       console.log("Updating winner status for:", memberId);
-      
+
       const response = await axios.put(
         `https://api.regeve.in/api/event-forms/${memberId}`,
         {
           data: {
-            IsWinnned: true  // CHANGED FROM false TO true
-          }
+            IsWinnned: true, // CHANGED FROM false TO true
+          },
         }
       );
 
@@ -365,8 +369,8 @@ const eligible = response.data.data.filter((m) => {
       image: memberData.Photo?.url
         ? `${baseUrl}${memberData.Photo.url}`
         : memberData.Photo?.data?.attributes?.url
-          ? `${baseUrl}${memberData.Photo.data.attributes.url}`
-          : null,
+        ? `${baseUrl}${memberData.Photo.data.attributes.url}`
+        : null,
       age: memberData.Age || 0,
       familyMembers: memberData.Family_Member_Count || 0,
       address: memberData.Address || "Not provided",
@@ -394,17 +398,18 @@ const eligible = response.data.data.filter((m) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 flex items-center justify-center p-4 font-serif relative">
-
       {/* Fixed Go Home Button - Top Right */}
       <motion.button
         onClick={() => navigate("/")}
-        className={`fixed top-6 right-6 z-50 bg-gradient-to-br from-slate-900 via-purple-900 hover:from-blue-700 hover:to-cyan-800 text-white px-5 py-2.5 rounded-lg shadow-lg cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105 font-medium text-sm border border-white/30 backdrop-blur-sm ${showProfile ? 'blur-sm opacity-70' : 'opacity-100'}`}
+        className={`fixed top-6 right-6 z-50 bg-gradient-to-br from-slate-900 via-purple-900 hover:from-blue-700 hover:to-cyan-800 text-white px-5 py-2.5 rounded-lg shadow-lg cursor-pointer transition-all duration-200 ease-in-out transform hover:scale-105 font-medium text-sm border border-white/30 backdrop-blur-sm ${
+          showProfile ? "blur-sm opacity-70" : "opacity-100"
+        }`}
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.2 }}
         whileHover={{
           scale: 1.05,
-          boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)"
+          boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)",
         }}
       >
         ← Go Home
@@ -630,7 +635,9 @@ const eligible = response.data.data.filter((m) => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className={`bg-gradient-to-br from-slate-800/90 to-purple-900/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-500/30 p-8 max-w-md w-full relative overflow-hidden transition-all duration-300 ${showProfile ? 'blur-sm opacity-70' : 'opacity-100'}`}
+        className={`bg-gradient-to-br from-slate-800/90 to-purple-900/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-500/30 p-8 max-w-md w-full relative overflow-hidden transition-all duration-300 ${
+          showProfile ? "blur-sm opacity-70" : "opacity-100"
+        }`}
       >
         {/* Decorative Corner Elements */}
         <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-purple-400 rounded-tl-lg"></div>
@@ -693,10 +700,10 @@ const eligible = response.data.data.filter((m) => {
                   index === 0
                     ? "sticky"
                     : isSpinning
-                      ? "flip"
-                      : blastAnimation
-                        ? "blast"
-                        : "initial"
+                    ? "flip"
+                    : blastAnimation
+                    ? "blast"
+                    : "initial"
                 }
                 className="w-16 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl shadow-2xl border-2 border-purple-400 flex items-center justify-center relative overflow-hidden"
               >
@@ -828,7 +835,7 @@ const eligible = response.data.data.filter((m) => {
                 className="text-2xl font-bold mb-2 font-serif tracking-wide"
               >
                 {result.updateSuccess === false &&
-                  result.message.includes("Error")
+                result.message.includes("Error")
                   ? "ERROR"
                   : "CONGRATULATIONS!"}
               </motion.h3>
