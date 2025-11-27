@@ -735,7 +735,7 @@ const UserDetail = () => {
                         member.Photo.url
                       }?t=${Date.now()}`}
                       alt="Profile"
-                      className="w-28 h-28 object-cover rounded-full border-4 border-indigo-200 shadow-md"
+                      className="w-28 h-28 rounded-xl border-4 border-indigo-200 shadow-md"
                       onError={() => setImageError(true)}
                     />
                   ) : (
@@ -1057,20 +1057,6 @@ const UserDetail = () => {
             </h2>
 
             <div className="space-y-1">
-              <ContactDetailItem
-                icon={FaPhoneAlt}
-                label="Phone Number"
-                value={getFieldValue("Phone_Number")}
-                buttonText="Call"
-                iconColor="text-indigo-600"
-                isEditing={isEditing}
-                fieldName="Phone_Number"
-                onFieldChange={handleFieldChange}
-                type="tel"
-                placeholder="+1 (555) 123-4567"
-                validation={validatePhoneNumber}
-                actionDisabled={!getFieldValue("Phone_Number")}
-              />
 
               <ContactDetailItem
                 icon={FaWhatsapp}

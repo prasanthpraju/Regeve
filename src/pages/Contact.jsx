@@ -16,7 +16,7 @@ const Contact = () => {
     {
       icon: Phone,
       title: 'Phone',
-      details: '+1 (555) 123-4567',
+      details: '+91 98432 75075',
       subtitle: 'Mon-Sat from 9am to 6pm',
       color: 'from-green-500 to-emerald-500',
       bgColor: 'bg-green-50',
@@ -25,17 +25,17 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'Email',
-      details: 'hello@events.com',
+      details: 'regeveindia@gmail.com',
       subtitle: 'Online support',
       color: 'from-blue-500 to-cyan-500',
       bgColor: 'bg-blue-50',
-      link: 'mailto:hello@events.com'
+      link: 'mailto:regeveindia@gmail.com'
     },
     {
       icon: MapPin,
       title: 'Address',
-      details: '123 Event Street, Suite 100',
-      subtitle: 'San Francisco, CA 94105',
+      details: 'Vadapalani',
+      subtitle: 'Chennai',
       color: 'from-purple-500 to-pink-500',
       bgColor: 'bg-purple-50',
       link: 'https://maps.google.com'
@@ -339,45 +339,6 @@ const Contact = () => {
                   )}
                 </motion.button>
               </form>
-            </motion.div>
-
-            {/* Map */}
-            <motion.div
-              variants={mapVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200"
-            >
-              {/* Embedded Google Map */}
-              <div className="w-full h-64">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62188.14546895284!2d80.17398244991533!3d13.051000657871413!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a5267f622160271%3A0x3149fc03560d447!2sJGN%20Technologies!5e0!3m2!1sen!2sin!4v1763468113591!5m2!1sen!2sin"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full h-full"
-                ></iframe>
-              </div>
-
-
-              {/* Text Description */}
-              <div className="p-4 text-center">
-                <p className="text-gray-600">
-                  Visit our office or explore the location on{' '}
-                  <a
-                    href="https://maps.google.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:text-blue-600 font-semibold"
-                  >
-                    Google Maps
-                  </a>
-                </p>
-              </div>
             </motion.div>
 
           </div>

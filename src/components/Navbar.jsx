@@ -46,7 +46,7 @@ const Navbar = () => {
   const storedUser = localStorage.getItem("userProfile");
   const userName = storedUser ? JSON.parse(storedUser).name : "";
 
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const isLoggedIn = !!localStorage.getItem("userToken");
 
   const handleLogout = async () => {
     try {
@@ -68,7 +68,6 @@ const Navbar = () => {
       showToast("Logout failed on server, but logging out locally.", "error");
     } finally {
       // ALWAYS log out user locally
-      localStorage.setItem("isLoggedIn", "false");
       localStorage.removeItem("userToken");
       localStorage.removeItem("userProfile");
 

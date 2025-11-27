@@ -82,8 +82,8 @@ const Footer = () => {
     },
     {
       icon: Phone,
-      text: '+91 8608889999',
-      href: 'tel: 044 4213 4213',
+      text: '+91 98432 75075',
+      href: 'tel: 98432 75075',
       gradient: 'hover:text-blue-600'
     },
     {

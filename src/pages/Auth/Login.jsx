@@ -70,8 +70,7 @@ const Login = ({ onClose, onSwitchToRegister, onLoginSuccess }) => {
         setSuccess(true);
 
         // Store in localStorage
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userToken", data.login?.token || "");
+        localStorage.setItem("userToken", data.token);
         localStorage.setItem(
           "userProfile",
           JSON.stringify({
@@ -83,8 +82,8 @@ const Login = ({ onClose, onSwitchToRegister, onLoginSuccess }) => {
 
         // Close after animation
         setTimeout(() => {
-          onClose();
           navigate("/dashboard");
+          onClose();
         }, 2000);
       } else {
         setApiError(data.message || "Invalid email or password");

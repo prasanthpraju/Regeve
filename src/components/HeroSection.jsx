@@ -49,7 +49,8 @@ const HeroSection = () => {
 
     const navigate = useNavigate();
 
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const isLoggedIn = localStorage.getItem("userToken") !== null;
+
 
   
 

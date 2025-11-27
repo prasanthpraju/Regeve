@@ -58,7 +58,7 @@ const ViewPopup = ({ user, onClose }) => {
             <div className="w-64 h-64 rounded-3xl overflow-hidden border-4 border-white shadow-2xl ring-4 ring-blue-100">
               <img
                 src={`${user.userImage}?t=${Date.now()}`}
-                className="w-full h-full object-cover"
+                className=" object-cover"
                 alt="Profile"
               />
             </div>
@@ -155,10 +155,8 @@ const ViewPopup = ({ user, onClose }) => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {[
                   ["Full Name", user.name, "📝"],
-                  ["Age", user.age, "🎂"],
                   ["Gender", user.gender, "⚥"],
                   ["Email", user.email, "📧"],
-                  ["Phone", user.phone, "📞"],
                   ["WhatsApp", user.whatsapp, "💬"],
                   ["Travel Mode", user.travelmode, "🚌"],
                   ["Pickup Location", user.pickuplocation, "📍"],
@@ -294,6 +292,7 @@ const EditPopup = ({ user, onClose, onSaved }) => {
     Self: "",
     Travel_Mode: "",
     Pickup_Location: "",
+    Coming:"No"
   });
 
   const [photoFile, setPhotoFile] = useState(null);
@@ -308,7 +307,6 @@ const EditPopup = ({ user, onClose, onSaved }) => {
       Member_ID: user.userId || "",
       Age: user.age || "",
       Gender: user.gender || "",
-      Phone_Number: user.phone || "",
       WhatsApp_Number: user.whatsapp || "",
       Email: user.email || "",
       Children_Count: user.childrencount || "",
@@ -320,6 +318,7 @@ const EditPopup = ({ user, onClose, onSaved }) => {
       Self: user.self || "",
       Travel_Mode: user.travelmode || "",
       Pickup_Location: user.pickuplocation || "",
+      Coming: user.comingStatus || "No",  
     });
   }, [user]);
 
@@ -389,7 +388,6 @@ const EditPopup = ({ user, onClose, onSaved }) => {
         Member_ID: form.Member_ID,
         Age: Number(form.Age) || 0,
         Gender: form.Gender,
-        Phone_Number: form.Phone_Number ? Number(form.Phone_Number) : null,
         WhatsApp_Number: form.WhatsApp_Number
           ? Number(form.WhatsApp_Number)
           : null,
@@ -405,6 +403,8 @@ const EditPopup = ({ user, onClose, onSaved }) => {
         Self: Number(form.Self) || 0,
         Travel_Mode: form.Travel_Mode,
         Pickup_Location: form.Pickup_Location,
+        coming_to_family_day: form.Coming,
+
       };
 
       if (uploadedPhoto) payload.Photo = uploadedPhoto.id;
@@ -423,7 +423,6 @@ const EditPopup = ({ user, onClose, onSaved }) => {
           age: Number(form.Age) || 0,
           gender: form.Gender,
           email: form.Email,
-          phone: form.Phone_Number,
           whatsapp: form.WhatsApp_Number,
           companyId: form.Company_ID,
 
@@ -510,7 +509,7 @@ const EditPopup = ({ user, onClose, onSaved }) => {
                     : `${user.userImage}?t=${Date.now()}`
                 }
                 alt="Profile"
-                className="w-full h-full object-cover"
+                className="object-cover"
               />
             </div>
 
@@ -588,19 +587,49 @@ const EditPopup = ({ user, onClose, onSaved }) => {
                 User must be PRESENT & VERIFIED to receive gift.
               </p>
             )}
+            {/* Join (Coming to Family Day) Toggle */}
+            <div className="mt-6 flex items-center justify-between w-full max-w-xs bg-white border border-gray-200 p-4 rounded-2xl shadow-sm">
+              <span className="text-gray-700 font-semibold flex items-center">
+                ✔️ Present At Event Day
+              </span>
+
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.Coming === "Yes"}
+                  onChange={(e) =>
+                    setForm((p) => ({
+                      ...p,
+                      Coming: e.target.checked ? "Yes" : "No",
+                    }))
+                  }
+                  className="hidden"
+                />
+
+                <div
+                  className={`w-14 h-7 rounded-full flex items-center p-1 transition ${
+                    form.Coming === "Yes" ? "bg-green-500" : "bg-gray-300"
+                  }`}
+                >
+                  <div
+                    className={`bg-white w-6 h-6 rounded-full shadow-md transform transition ${
+                      form.Coming === "Yes" ? "translate-x-7" : "translate-x-0"
+                    }`}
+                  ></div>
+                </div>
+              </label>
+            </div>
           </div>
 
           {/* RIGHT SIDE FORM */}
           <div className="flex-1">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {[
-                ["Full Name", "Name", "text", "👤"],
+                ["Full Name", "Name", "text", "👤", true],
                 ["Member ID", "Member_ID", "text", "🆔", true],
-                ["Phone Number", "Phone_Number", "tel", "📞"],
                 ["WhatsApp Number", "WhatsApp_Number", "tel", "💬"],
                 ["Email Address", "Email", "email", "📧"],
                 ["Company ID", "Company_ID", "text", "🏢", true],
-                ["Age", "Age", "number", "🎂"],
                 ["Gender", "Gender", "select", "⚥"],
                 ["Travel Mode", "Travel_Mode", "select", "🚌"],
 
@@ -608,7 +637,7 @@ const EditPopup = ({ user, onClose, onSaved }) => {
                   ? [["Pickup Location", "Pickup_Location", "text", "📍"]]
                   : []),
 
-                ["Self", "Self", "text", "👥", true],
+                ["Employee Count", "Self", "text", "👥", true],
                 ["Adult Count", "Adult_Count", "number"],
                 ["Children Count", "Children_Count", "number"],
                 ["Veg Count", "Veg_Count", "number", "🥗"],
@@ -758,8 +787,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    if (!isLoggedIn) {
+    const token = localStorage.getItem("userToken");
+    if (!token) {
       navigate("/"); // redirect home
     }
   }, []);
@@ -795,6 +824,7 @@ const Dashboard = () => {
         isPresent: item.IsPresent === true,
         isWinned: item.IsWinnned === true,
         IsVerified_Member: item.IsVerified_Member === true,
+        comingStatus: item.coming_to_family_day || null,
         isGiftReceived:
           item.IsGiftReceived === true ||
           item.IsGiftReceived === 1 ||
@@ -916,6 +946,37 @@ const Dashboard = () => {
       setUsers((prev) =>
         prev.map((u) =>
           u.userId === memberId ? { ...u, IsVerified_Member: !newStatus } : u
+        )
+      );
+    }
+  };
+
+  const handleJoinToggle = async (memberId, newStatus) => {
+    try {
+      // Update UI instantly
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.userId === memberId ? { ...u, comingStatus: newStatus } : u
+        )
+      );
+
+      // Update Strapi
+      await axios.put(`https://api.regeve.in/api/event-forms/${memberId}`, {
+        data: {
+          coming_to_family_day: newStatus,
+        },
+      });
+
+      console.log("Join status updated for:", memberId);
+    } catch (err) {
+      console.error("Join toggle failed:", err);
+
+      // Rollback UI if failed
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.userId === memberId
+            ? { ...u, comingStatus: newStatus === "Yes" ? "No" : "Yes" }
+            : u
         )
       );
     }
@@ -1501,6 +1562,32 @@ const Dashboard = () => {
                       </span>
                     </th>
                     <th className="px-8 py-6 text-center">
+                      <div className="flex flex-col items-center">
+                        {/* Column Title */}
+                        <span className="text-base font-semibold text-gray-700 uppercase tracking-wider">
+                          Join
+                        </span>
+                        <button
+                          onClick={() => {
+                            const link = document.createElement("a");
+                            link.href =
+                              "https://api.regeve.in/api/event-forms/export-notjoining";
+                            link.setAttribute(
+                              "download",
+                              "notjoining-users.xlsx"
+                            );
+                            document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+                          }}
+                          className="px-3 py-1 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition text-xs font-semibold cursor-pointer"
+                        >
+                          📄 Export
+                        </button>
+                      </div>
+                    </th>
+
+                    <th className="px-8 py-6 text-center">
                       <span className="text-base font-semibold text-gray-700 uppercase tracking-wider">
                         Actions
                       </span>
@@ -1529,15 +1616,14 @@ const Dashboard = () => {
                         {/* User Details */}
                         <td className="px-8 py-6">
                           <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center shadow-inner">
-                              <span className="w-8 h-8 rounded-full">
-                                <img
-                                  src={`${user.userImage}?t=${Date.now()}`}
-                                  alt={user.name}
-                                  className="w-8 h-8 rounded-full object-cover"
-                                />
-                              </span>
+                            <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                              <img
+                                src={`${user.userImage}?t=${Date.now()}`}
+                                alt={user.name}
+                                className="w-full h-full rounded-lg"
+                              />
                             </div>
+
                             <div>
                               <p className="text-lg font-semibold text-gray-900 mb-1">
                                 {user.name}
@@ -1603,6 +1689,22 @@ const Dashboard = () => {
                               </span>
                             </label>
                           </div>
+                        </td>
+                        {/* Coming to Family Day */}
+                        <td className="px-6 py-6 text-center">
+                          {user.comingStatus === "Yes" ? (
+                            <span className="px-4 py-2 bg-green-100 text-green-700 font-semibold rounded-xl text-sm">
+                              Yes
+                            </span>
+                          ) : user.comingStatus === "No" ? (
+                            <span className="px-4 py-2 bg-red-100 text-red-700 font-semibold rounded-xl text-sm">
+                              No
+                            </span>
+                          ) : (
+                            <span className="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-xl text-sm">
+                              -
+                            </span>
+                          )}
                         </td>
 
                         {/* Actions */}

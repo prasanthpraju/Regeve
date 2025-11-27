@@ -23,6 +23,7 @@ import RegisterForm from './pages/Auth/RegisterForm';
 import MemberDashBoard from './pages/Scan/MemberDashBoard';
 import QRCodeForm from './components/QRCodeFom/QRCodeForm';
 import GiftStatusPage from './pages/GiftStatusPage';
+import QRRedirect from './pages/QRRedirect';
 
 export default function App() {
   const location = useLocation();
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="/scanDashboard" element={<MemberDashBoard/>}/>
         <Route path='/eventform-qr'element={<QRCodeForm/>}/>
         <Route path='/giftstatus'element={<GiftStatusPage/>}/>
+        <Route path="/qr/:memberId" element={<QRRedirect />} />
 
       </Routes>
 
