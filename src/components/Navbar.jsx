@@ -53,7 +53,7 @@ const Navbar = () => {
       const token = localStorage.getItem("userToken");
 
       await axios.post(
-        "https://api.regeve.in/api/admin/logout",
+        "http://localhost:1337/admin/logout",
         {}, // backend usually doesn’t need email
         {
           headers: {
@@ -85,6 +85,7 @@ const Navbar = () => {
     { name: "Home", path: "/" },
     { name: "About Us", path: "/about" },
     { name: "Contact", path: "/contact" },
+    {name:" Election ",path:"/electionhome"},
     ...(isLoggedIn ? [{ name: "Dashboard", path: "/dashboard" }] : []),
   ];
 

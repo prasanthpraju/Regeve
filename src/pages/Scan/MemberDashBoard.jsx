@@ -8,14 +8,14 @@ export default function MemberDashBoard() {
 
   useEffect(() => {
     // Connect to backend Socket.IO
-    const socket = io("https://api.regeve.in", {
+    const socket = io("http://localhost:1337", {
       transports: ["websocket"],
     });
 
     socket.on("connect", () => {
       console.log("✅ Connected to Socket.IO:", socket.id);
     });
-  
+
     // Listen for scan events
     socket.on("member-scanned", ({ Member_ID }) => {
       console.log("📥 member-scanned received:", Member_ID);
@@ -40,8 +40,9 @@ export default function MemberDashBoard() {
   return (
     <div style={{ padding: "20px" }}>
       <h1>Admin Dashboard</h1>
-      <p>Keep this page open. When someone scans a QR, this screen will change.</p>
+      <p>
+        Keep this page open. When someone scans a QR, this screen will change.
+      </p>
     </div>
   );
 }
-

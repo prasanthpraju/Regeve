@@ -8,7 +8,9 @@ const GiftStatusPage = () => {
   // Fetch all event-forms
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("https://api.regeve.in/api/event-forms?populate=Photo");
+      const res = await axios.get(
+        "http://localhost:1337/api/event-forms?populate=Photo"
+      );
       setUsers(res.data.data);
     } catch (err) {
       console.error("Error fetching users", err);
@@ -24,11 +26,14 @@ const GiftStatusPage = () => {
     }
 
     try {
-      await axios.put(`https://api.regeve.in/api/event-forms/${user.Member_ID}`, {
-        data: {
-          IsGiftReceived: status,
-        },
-      });
+      await axios.put(
+        `http://localhost:1337/api/event-forms/${user.Member_ID}`,
+        {
+          data: {
+            IsGiftReceived: status,
+          },
+        }
+      );
 
       fetchUsers();
     } catch (err) {
@@ -85,7 +90,7 @@ const GiftStatusPage = () => {
           <tbody>
             {filteredUsers.map((user) => {
               const imageUrl = user.Photo?.url
-                ? `https://api.regeve.in${user.Photo.url}`
+                ? `http://localhost:1337${user.Photo.url}`
                 : "https://via.placeholder.com/60";
 
               return (
@@ -110,7 +115,6 @@ const GiftStatusPage = () => {
 
                   <td className="p-2 border">
                     <div className="flex justify-center gap-3">
-
                       {/* YES BUTTON */}
                       <button
                         onClick={() => updateGiftStatus(user, true)}
@@ -134,14 +138,12 @@ const GiftStatusPage = () => {
                       >
                         No
                       </button>
-
                     </div>
                   </td>
                 </tr>
               );
             })}
           </tbody>
-
         </table>
       </div>
     </div>

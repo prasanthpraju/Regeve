@@ -51,7 +51,7 @@ const Login = ({ onClose, onSwitchToRegister, onLoginSuccess }) => {
     setApiError("");
 
     try {
-      const response = await fetch("https://api.regeve.in/api/admin/login", {
+      const response = await fetch("http://localhost:1337/api/admin/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

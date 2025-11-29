@@ -193,7 +193,7 @@ const LuckyDraw = () => {
   const fetchAllMembers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("https://api.regeve.in/api/event-forms");
+      const response = await axios.get("http://localhost:1337/api/form");
       console.log("API Response:", response.data.data);
 
       // Filter members who haven't won yet
@@ -228,7 +228,7 @@ const LuckyDraw = () => {
       console.log("Updating winner status for:", memberId);
 
       const response = await axios.put(
-        `https://api.regeve.in/api/event-forms/${memberId}`,
+        `https://localhost:1337/api/event-forms/${memberId}`,
         {
           data: {
             IsWinnned: true, // CHANGED FROM false TO true
@@ -358,7 +358,7 @@ const LuckyDraw = () => {
 
     console.log("Formatting member:", member);
     const memberData = member.attributes || member;
-    const baseUrl = "https://api.regeve.in";
+    const baseUrl = "https://localhost:1337";
 
     return {
       name: memberData.Name || "No Name",

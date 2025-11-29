@@ -24,6 +24,10 @@ import MemberDashBoard from './pages/Scan/MemberDashBoard';
 import QRCodeForm from './components/QRCodeFom/QRCodeForm';
 import GiftStatusPage from './pages/GiftStatusPage';
 import QRRedirect from './pages/QRRedirect';
+import ElectionHome from './pages/Election/ElectionHome';
+import CandidateDashboard from './pages/Election/CandidateDashboard';
+import ElectionDashboard from './pages/Election/ElectionDashboard ';
+import ParticipationForm from './pages/Election/ParticipationForm';
 
 export default function App() {
   const location = useLocation();
@@ -63,7 +67,10 @@ export default function App() {
         <Route path='/eventform-qr'element={<QRCodeForm/>}/>
         <Route path='/giftstatus'element={<GiftStatusPage/>}/>
         <Route path="/qr/:memberId" element={<QRRedirect />} />
-
+        <Route path='/electionhome' element={<ElectionHome />} />
+        <Route path='/candidate-dashboard' element={<CandidateDashboard />} />
+        <Route path='election-dashboard' element={<ElectionDashboard />} />
+        <Route path='participationForm' element={<ParticipationForm />} />
       </Routes>
 
       {!hideLayout && <Footer />}
