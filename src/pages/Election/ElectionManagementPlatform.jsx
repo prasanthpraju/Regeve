@@ -104,7 +104,7 @@ const ElectionManagementPlatform = () => {
   const stats = [
     { label: "Elections Managed", value: "1,500+", icon: <Trophy className="w-5 h-5" /> },
     { label: "Total Votes Cast", value: "100K+", icon: <Vote className="w-5 h-5" /> },
-    { label: "States Served", value: "10+", icon: <Cloud className="w-5 h-5" /> },
+    { label: "District Served", value: "10+", icon: <Cloud className="w-5 h-5" /> },
     { label: "Client Satisfaction", value: "98.7%", icon: <Star className="w-5 h-5" /> },
   ];
 

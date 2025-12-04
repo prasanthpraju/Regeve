@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+ import React, { useState, memo } from "react";
 import { motion } from "framer-motion";
 import {
   User,
@@ -18,6 +18,65 @@ import {
 } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
 
+// Move InputField component outside to prevent recreation on every render
+const InputField = memo(
+  ({
+    label,
+    name,
+    type = "text",
+    icon: Icon,
+    placeholder,
+    required = false,
+    maxLength = 255,
+    value,
+    onChange,
+    error,
+  }) => (
+    <div className="space-y-2">
+      <label className="flex items-center justify-between text-sm font-medium text-gray-700">
+        <span className="flex items-center gap-2">
+          {Icon && <Icon className="w-4 h-4 text-gray-500" />}
+          {label}
+          {required && <span className="text-red-500">*</span>}
+        </span>
+
+        {type === "text" && (
+          <span className="text-xs text-gray-400">
+            {value?.length || 0}/{maxLength}
+          </span>
+        )}
+      </label>
+
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        maxLength={maxLength}
+        className={`w-full px-4 py-3 rounded-xl border-2 ${
+          error
+            ? "border-red-300 focus:border-red-500"
+            : "border-gray-300 focus:border-blue-500"
+        } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200 bg-white`}
+      />
+
+      {error && (
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-red-500 text-sm flex items-center gap-1"
+        >
+          <AlertCircle className="w-4 h-4" />
+          {error}
+        </motion.p>
+      )}
+    </div>
+  )
+);
+
+InputField.displayName = 'InputField';
+
 const ElectionForm = () => {
   const [formData, setFormData] = useState({
     fullName: "",
@@ -27,7 +86,7 @@ const ElectionForm = () => {
     organization: "",
     department: "",
     position: "",
-    agreesToTerms: false, // Initial state for checkbox
+    agreesToTerms: false,
   });
 
   const [errors, setErrors] = useState({});
@@ -94,90 +153,14 @@ const ElectionForm = () => {
     toast.success("Invitation link copied!");
   };
 
-  const shareOptions = [
-    {
-      platform: "WhatsApp",
-      color: "hover:bg-green-50 hover:text-green-600",
-      icon: <MessageSquare className="w-5 h-5" />,
-      onClick: () => {
-        const text = `Join our corporate election! Register at: ${window.location.origin}/election-invite`;
-        window.open(
-          `https://wa.me/?text=${encodeURIComponent(text)}`,
-          "_blank"
-        );
-      },
-      tooltip: "Share via WhatsApp",
-    },
-    {
-      platform: "Email",
-      color: "hover:bg-blue-50 hover:text-blue-600",
-      icon: <Mail className="w-5 h-5" />,
-      onClick: () => {
-        const subject = "Join Our Corporate Election";
-        const body = `You're invited to participate!\n\nRegister here: ${window.location.origin}/election-invite`;
-        window.location.href = `mailto:?subject=${encodeURIComponent(
-          subject
-        )}&body=${encodeURIComponent(body)}`;
-      },
-      tooltip: "Share via Email",
-    },
-    {
-      platform: "Copy Link",
-      color: "hover:bg-gray-50 hover:text-gray-700",
-      icon: <Link className="w-5 h-5" />,
-      onClick: handleCopyLink,
-      tooltip: "Copy invitation link",
-    },
-  ];
-
-  const InputField = ({
-    label,
-    name,
-    type = "text",
-    icon: Icon,
-    placeholder,
-    required = false,
-    maxLength = 255, // Default max length
-  }) => (
-    <div className="space-y-2">
-      <label className="flex items-center justify-between text-sm font-medium text-gray-700">
-        <span className="flex items-center gap-2">
-          {Icon && <Icon className="w-4 h-4 text-gray-500" />}
-          {label}
-          {required && <span className="text-red-500">*</span>}
-        </span>
-        {/* Character Counter for text inputs */}
-        {type === "text" && (
-          <span className="text-xs text-gray-400">
-            {formData[name]?.length || 0}/{maxLength}
-          </span>
-        )}
-      </label>
-      <input
-        type={type}
-        name={name}
-        value={formData[name]}
-        onChange={handleChange}
-        placeholder={placeholder}
-        maxLength={maxLength} // Prevents unlimited text
-        className={`w-full px-4 py-3 rounded-xl border-2 ${
-          errors[name]
-            ? "border-red-300 focus:border-red-500"
-            : "border-gray-300 focus:border-blue-500"
-        } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200 bg-white`}
-      />
-      {errors[name] && (
-        <motion.p
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-red-500 text-sm flex items-center gap-1"
-        >
-          <AlertCircle className="w-4 h-4" />
-          {errors[name]}
-        </motion.p>
-      )}
-    </div>
-  );
+  // Fixed WhatsApp share function - now only shares the invitation link
+  const handleWhatsAppShare = () => {
+    const text = `Join our corporate election! Register at: ${window.location.origin}/election-invite`;
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(text)}`,
+      "_blank"
+    );
+  };
 
   // Success View
   if (isSubmitted) {
@@ -206,7 +189,7 @@ const ElectionForm = () => {
                 fullName: "",
                 email: "",
                 phone: "",
-              })); // Reset basics
+              }));
             }}
             className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:opacity-90"
           >
@@ -216,20 +199,12 @@ const ElectionForm = () => {
       </div>
     );
   }
-  const handleWhatsAppShare = () => {
-    const message = `Here is my election form details:\n\nName: ${formData.name}\nPhone: ${formData.phone}\nAge: ${formData.age}`;
-
-    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
-  };
 
   // Main Form View
   return (
-    // Added pt-24 to fix navbar overlap
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 px-4 pt-24 pb-12">
       <Toaster position="top-right" />
 
-      {/* Centered Container: Removed Grid, added max-w-2xl mx-auto */}
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -261,6 +236,9 @@ const ElectionForm = () => {
                     placeholder="John Doe"
                     required
                     maxLength={50}
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    error={errors.fullName}
                   />
                 </div>
                 <InputField
@@ -270,6 +248,9 @@ const ElectionForm = () => {
                   icon={Mail}
                   placeholder="john@example.com"
                   required
+                  value={formData.email}
+                  onChange={handleChange}
+                  error={errors.email}
                 />
                 <InputField
                   label="Phone Number"
@@ -279,6 +260,9 @@ const ElectionForm = () => {
                   placeholder="+1 (555) 123-4567"
                   required
                   maxLength={15}
+                  value={formData.phone}
+                  onChange={handleChange}
+                  error={errors.phone}
                 />
                 <div className="md:col-span-2">
                   <InputField
@@ -289,6 +273,9 @@ const ElectionForm = () => {
                     placeholder="18"
                     required
                     maxLength={3}
+                    value={formData.age}
+                    onChange={handleChange}
+                    error={errors.age}
                   />
                 </div>
               </div>
@@ -307,7 +294,10 @@ const ElectionForm = () => {
                 icon={Building2}
                 placeholder="ABC Corporation"
                 required
-                maxLength={80} // Limit long text
+                maxLength={80}
+                value={formData.organization}
+                onChange={handleChange}
+                error={errors.organization}
               />
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -317,6 +307,9 @@ const ElectionForm = () => {
                   icon={MapPin}
                   placeholder="Marketing"
                   maxLength={50}
+                  value={formData.department}
+                  onChange={handleChange}
+                  error={errors.department}
                 />
                 <InputField
                   label="Position"
@@ -324,6 +317,9 @@ const ElectionForm = () => {
                   icon={Briefcase}
                   placeholder="Manager"
                   maxLength={50}
+                  value={formData.position}
+                  onChange={handleChange}
+                  error={errors.position}
                 />
               </div>
             </div>
@@ -381,7 +377,7 @@ const ElectionForm = () => {
                 disabled={isSubmitting}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
-                className=" ml-0 sm:ml-40 w-full sm:w-60 py-4  bg-blue-600  text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300  disabled:opacity-50 disabled:cursor-not-allowed  flex items-center justify-center gap-3"
+                className="ml-0 sm:ml-40 w-full sm:w-60 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
               >
                 {isSubmitting ? (
                   <>
@@ -390,7 +386,7 @@ const ElectionForm = () => {
                   </>
                 ) : (
                   <>
-                    <Send className="w-5 h-5  " />
+                    <Send className="w-5 h-5" />
                     Submit Registration
                   </>
                 )}
