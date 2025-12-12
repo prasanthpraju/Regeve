@@ -119,10 +119,10 @@ const ElectionDashboard = () => {
     .sort((a, b) => b.votes - a.votes)[0];
 
   return (
-    <div className="pt-20 px-4 md:px-6 max-w-7xl mx-auto">
+    <div className="pt-10 px-4 md:px-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-10">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+      <div className="mb-10 ">
+        <div className="flex flex-col lg:flex-row  lg:items-center lg:justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Election Analytics Dashboard
@@ -138,9 +138,9 @@ const ElectionDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-60 ml-45"> 
           <div
-            className="bg-white p-6 rounded-2xl border border-gray-100 
+            className="bg-white  p-6 rounded-2xl border h-60 w-70 border-gray-100 
 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)]
 hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)]
 transition-all duration-300"
@@ -165,7 +165,7 @@ transition-all duration-300"
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 
+          <div className="bg-white p-6 h-60 w-70 rounded-2xl border border-gray-100 
 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)]
 hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)]
 transition-all duration-300">
@@ -187,7 +187,7 @@ transition-all duration-300">
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 
+          <div className="bg-white p-6 h-60 w-70 rounded-2xl border border-gray-100 
 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)]
 hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)]
 transition-all duration-300">
@@ -209,43 +209,7 @@ transition-all duration-300">
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 
-shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)]
-hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)]
-transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 rounded-xl bg-amber-50">
-                <Trophy className="w-6 h-6 text-amber-600" />
-              </div>
-              <span className="text-sm text-amber-600 font-medium">
-                Leading
-              </span>
-            </div>
-            <p className="text-gray-500 text-sm font-medium mb-2">
-              Front Runner
-            </p>
-            <p className="text-xl font-bold text-gray-900 truncate">
-              {leadingCandidate?.name || "N/A"}
-            </p>
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-sm mb-1">
-                <span className="text-gray-500">Votes:</span>
-                <span className="font-semibold text-gray-900">
-                  {leadingCandidate?.votes.toLocaleString() || 0}
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-gradient-to-r from-amber-500 to-amber-600 h-2 rounded-full"
-                  style={{
-                    width: `${
-                      ((leadingCandidate?.votes || 0) / totalVotes) * 100
-                    }%`,
-                  }}
-                ></div>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
 

@@ -31,10 +31,10 @@ const CandidateDashboard = ({ token = null }) => {
     name: "",
     email: "",
     phone_number: "",
-    whatsapp_number: "",
+    whatsApp_number: "",
     age: "",
-    gender: "",
     position: "",
+    gender: "",
     sectionId: null,
   });
   const navigate = useNavigate();
@@ -63,9 +63,10 @@ const CandidateDashboard = ({ token = null }) => {
 
   // Fetch candidates from backend on component mount
   useEffect(() => {
-    fetchCandidates();
-  }, [electionData.electionId]);
-
+    if (sections.length > 0 && electionData.electionId) {
+      fetchCandidates();
+    }
+  }, [electionData.electionId, sections]);
   // Fetch sections from backend
   useEffect(() => {
     fetchSections();
@@ -128,89 +129,77 @@ const CandidateDashboard = ({ token = null }) => {
   // Fetch sections from backend
   const fetchSections = async () => {
     try {
-      const response = await axiosInstance.get("/election-candidate-positions");
+      const response = await axiosInstance.get(
+        "/election-candidate-positions",
+        {
+          params: { populate: "*" },
+        }
+      );
 
-      console.log("API Response:", response.data); // Debug log
+      console.log("SECTION RESPONSE:", response.data);
 
-      if (response.data && Array.isArray(response.data)) {
-        // If response.data is directly an array (no 'data' wrapper)
-        const sectionsData = response.data.map((section) => ({
-          id: section.id,
-          name: section.Position || "Unnamed Position",
-          isOpen: true,
-          position: section.Position || "Unnamed Position",
-          candidates: [],
-        }));
-        setSections(sectionsData);
-      } else if (response.data && Array.isArray(response.data.data)) {
-        // If response has 'data' wrapper
-        const sectionsData = response.data.data.map((section) => ({
-          id: section.id,
-          name: section.Position || "Unnamed Position",
-          isOpen: true,
-          position: section.Position || "Unnamed Position",
-          candidates: [],
-        }));
-        setSections(sectionsData);
-      } else {
-        console.log("Invalid response structure:", response.data);
-        setSections([]);
-      }
+      const list = response?.data ?? []; // IMPORTANT FIX
+
+      const sectionsData = list.map((section) => ({
+        id: section.id,
+        name: section.Position,
+        position: section.Position,
+        isOpen: true,
+
+        candidates:
+          section.candidates?.map((c) => ({
+            id: c.id,
+            name: c.name,
+            email: c.email,
+            phone: c.phone_number,
+            whatsapp: c.whatsApp_number,
+            age: c.age,
+            gender: c.gender,
+            candidate_id: c.candidate_id,
+            position: section.Position,
+            photoUrl: c.photo?.url ? `${API_URL}${c.photo.url}` : null,
+          })) || [],
+      }));
+
+      setSections(sectionsData);
     } catch (err) {
       console.error("Error fetching sections:", err);
-      setSections([]);
     }
   };
+
   // Fetch candidates from backend
   const fetchCandidates = async () => {
-    if (!electionData.electionId) return;
-
-    setIsFetchingCandidates(true);
     try {
       const response = await axiosInstance.get("/candidates", {
-        params: {
-          "filters[election][id]": electionData.electionId,
-          populate: "*",
-        },
+        params: { populate: ["photo", "election_candidate_position"] },
       });
 
-      if (response.data && response.data.data) {
-        const candidatesData = response.data.data.map((candidate) => ({
-          id: candidate.id,
-          name: candidate.attributes.name,
-          email: candidate.attributes.email,
-          phone: candidate.attributes.phone_number,
-          whatsapp: candidate.attributes.whatsapp_number,
-          age: candidate.attributes.age,
-          gender: candidate.attributes.gender,
-          position: candidate.attributes.position,
-          photoUrl: candidate.attributes.photo?.data?.attributes?.url
-            ? `${API_URL}${candidate.attributes.photo.data.attributes.url}`
-            : null,
-          section: candidate.attributes.section?.data?.id || null,
-          appliedDate: new Date(
-            candidate.attributes.createdAt
-          ).toLocaleDateString(),
-          candidate_id: candidate.attributes.candidate_id,
-          experience: candidate.attributes.experience,
-        }));
+      const candidatesData = response.data.data.map((candidate) => ({
+        id: candidate.id,
+        name: candidate.name,
+        email: candidate.email,
+        phone: candidate.phone_number,
+        whatsapp: candidate.whatsApp_number,
+        age: candidate.age,
+        gender: candidate.gender,
+        candidate_id: candidate.candidate_id,
+        section: candidate.section || null,
+        position: candidate.position || null,
+        photoUrl: candidate.photo?.url
+          ? `${API_URL}${candidate.photo.url}`
+          : null,
+      }));
 
-        setCandidates(candidatesData);
+      setCandidates(candidatesData);
 
-        // Organize candidates by section
-        const sectionsWithCandidates = sections.map((section) => ({
-          ...section,
-          candidates: candidatesData.filter(
-            (candidate) => candidate.section === section.id
-          ),
-        }));
-        setSections(sectionsWithCandidates);
-      }
+      const updatedSections = sections.map((section) => ({
+        ...section,
+        candidates: candidatesData.filter((c) => c.section === section.id),
+      }));
+
+      setSections(updatedSections);
     } catch (err) {
       console.error("Error fetching candidates:", err);
-      setMessage({ type: "error", text: "Failed to fetch candidates." });
-    } finally {
-      setIsFetchingCandidates(false);
     }
   };
 
@@ -227,6 +216,19 @@ const CandidateDashboard = ({ token = null }) => {
 
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
+    if (name === "sectionId") {
+      const id = Number(value); // ✅ convert to NUMBER (very important)
+      const selectedSection = sections.find((s) => s.id === id);
+
+      setFormData((prev) => ({
+        ...prev,
+        sectionId: id, // ✅ store NUMBER instead of string
+        position: selectedSection?.position,
+      }));
+
+      return;
+    }
+
     if (type === "file") {
       setPhoto(files[0]);
     } else {
@@ -266,22 +268,50 @@ const CandidateDashboard = ({ token = null }) => {
       const payload = {
         data: {
           name: formData.name,
-          candidate_id: formData.candidate_id || `CAND-${Date.now()}`,
           email: formData.email,
           phone_number: Number(formData.phone_number) || null,
-          whatsApp_number: Number(formData.whatsapp_number) || null,
+          whatsApp_number: Number(formData.whatsApp_number) || null,
           age: Number(formData.age) || null,
           gender: formData.gender,
-          position: selectedSection
-            ? selectedSection.position
-            : formData.position,
           photo: photoId,
           election: electionData.electionId,
-          section: formData.sectionId,
+          position: selectedSection?.position, // ADD THIS
+          section: selectedSection?.id,
         },
       };
 
+      console.log(
+        "📦 Final Payload Sent to Strapi:",
+        JSON.stringify(payload, null, 2)
+      );
+
       const response = await axiosInstance.post("/candidates", payload);
+
+      // -------------- UPDATE RELATION MANUALLY --------------
+      // -------------- UPDATE RELATION MANUALLY --------------
+      try {
+        const sectionId = Number(formData.sectionId);
+
+        const createdCandidateId = response.data.data.candidate_id; // FIXED
+
+        await axiosInstance.post(
+          `/election-candidate-positions/${sectionId}/add-candidate`,
+          { candidateId: createdCandidateId } // FIXED
+        );
+
+        console.log("🔗 Candidate linked to position successfully!");
+
+        await fetchSections();
+        await fetchCandidates();
+      } catch (err) {
+        console.error("❌ Failed to update relation:", err);
+        setMessage({
+          type: "error",
+          text: "Candidate created, but failed to link to election position.",
+        });
+      }
+
+      // ------------------------------------------------------
 
       // Update local state with new candidate
       const newCandidate = {
@@ -289,12 +319,10 @@ const CandidateDashboard = ({ token = null }) => {
         name: formData.name,
         email: formData.email,
         phone: formData.phone_number,
-        whatsapp: formData.whatsapp_number,
+        whatsapp: formData.whatsApp_number,
         age: formData.age,
         gender: formData.gender,
-        position: selectedSection
-          ? selectedSection.position
-          : formData.position,
+        position: selectedSection?.position,
         photoUrl: photo ? URL.createObjectURL(photo) : null,
         section: parseInt(formData.sectionId),
         appliedDate: new Date().toLocaleDateString(),
@@ -321,7 +349,7 @@ const CandidateDashboard = ({ token = null }) => {
         name: "",
         email: "",
         phone_number: "",
-        whatsapp_number: "",
+        whatsApp_number: "",
         age: "",
         gender: "",
         position: "",
@@ -349,23 +377,17 @@ const CandidateDashboard = ({ token = null }) => {
     }
 
     try {
-      // ADD 'data' wrapper as per Strapi v4 REST API convention
       const payload = {
         data: {
           Position: newSectionName.trim(),
         },
       };
 
-      console.log("Sending payload:", payload);
-
       const response = await axiosInstance.post(
         "/election-candidate-positions",
         payload
       );
 
-      console.log("Create response:", response.data);
-
-      // AFTER SUCCESS, REFETCH SECTIONS FROM BACKEND
       await fetchSections();
 
       setNewSectionName("");
@@ -373,22 +395,10 @@ const CandidateDashboard = ({ token = null }) => {
 
       setMessage({
         type: "success",
-        text: `New election position "${newSectionName}" created successfully.`,
+        text: `Position "${newSectionName}" created successfully.`,
       });
     } catch (err) {
-      console.error("Full error:", err);
-
-      // Better error logging
-      console.error("Error response:", err.response?.data);
-
-      setMessage({
-        type: "error",
-        text: `Failed to create position: ${
-          err.response?.data?.error?.message ||
-          err.response?.data?.message ||
-          err.message
-        }`,
-      });
+      console.error("Error creating position:", err);
     }
   };
 
@@ -831,7 +841,6 @@ const CandidateDashboard = ({ token = null }) => {
                           setFormData((prev) => ({
                             ...prev,
                             sectionId: section.id,
-                            position: section.position, // Auto-fill position from section
                           }));
                           setShowForm(true);
                         }}
@@ -942,8 +951,6 @@ const CandidateDashboard = ({ token = null }) => {
                           <h4 className="text-lg font-medium text-slate-900 mb-2">
                             No candidates for {section.position}
                           </h4>
-                          
-                           
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1022,8 +1029,7 @@ const CandidateDashboard = ({ token = null }) => {
                       Add New Candidate
                     </h2>
                     <p className="text-slate-600 text-sm mt-1">
-                      {electionData.electionName} • Position:{" "}
-                      {formData.position}
+                      {electionData.electionName}
                     </p>
                   </div>
                   <button
@@ -1048,15 +1054,16 @@ const CandidateDashboard = ({ token = null }) => {
                     value={formData.sectionId || ""}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    className="w-full px-3 py-2.5 border border-slate-300 rounded-lg"
                   >
                     <option value="">Choose an election position</option>
                     {sections.map((section) => (
                       <option key={section.id} value={section.id}>
-                        {section.name} ({section.position})
+                        {section.position} {/* FIXED */}
                       </option>
                     ))}
                   </select>
+
                   {formData.sectionId && (
                     <p className="text-sm text-slate-500 mt-2">
                       All candidates in this position will have the same
@@ -1145,9 +1152,9 @@ const CandidateDashboard = ({ token = null }) => {
                               className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white"
                             >
                               <option value="">Select Gender</option>
-                              <option value="Male">Male</option>
-                              <option value="Female">Female</option>
-                              <option value="Other">Other</option>
+                              <option value="male">Male</option>
+                              <option value="female">Female</option>
+                              <option value="others">Other</option>
                             </select>
                           </div>
                         </div>
@@ -1197,27 +1204,13 @@ const CandidateDashboard = ({ token = null }) => {
                           </label>
                           <input
                             type="tel"
-                            name="whatsapp_number"
-                            value={formData.whatsapp_number}
+                            name="whatsApp_number"
+                            value={formData.whatsApp_number}
                             onChange={handleInputChange}
                             className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white"
                             placeholder="Enter WhatsApp number"
                           />
                         </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Position (Auto-filled from Election Position)
-                          </label>
-                          <input
-                            type="text"
-                            name="position"
-                            value={formData.position}
-                            readOnly
-                            className="w-full px-3 py-2.5 border border-slate-300 rounded-lg bg-slate-100 text-slate-600"
-                          />
-                        </div>
-
                         <div>
                           <label className="block text-sm font-medium text-slate-700 mb-2">
                             Profile Photo
