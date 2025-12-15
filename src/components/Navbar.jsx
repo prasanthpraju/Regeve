@@ -87,6 +87,8 @@ const Navbar = () => {
     { name: "Home", path: "/" },
     { name: "About Us", path: "/about" },
     { name: "Contact", path: "/contact" },
+    { name: "Our Gallery", path: "/eventgallery" },
+
     {
       name: "Our Services",
       dropdown: true,
@@ -95,9 +97,10 @@ const Navbar = () => {
         { name: "Lucky Draw System", path: "/service/luckydraw-system-page" },
         { name: "Food Management", path: "/service/food-management" },
         { name: "Event Dashboard", path: "/service/dashboard-system-page" },
-        {name: "Election Management", path: "/electionManagementplatform"},
+        { name: "Election Management", path: "/electionManagementplatform" },
       ],
     },
+
     ...(isLoggedIn ? [{ name: "Dashboard", path: "/dashboard" }] : []),
   ];
 

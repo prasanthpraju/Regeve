@@ -30,6 +30,7 @@ import ParticipationForm from "./pages/Election/ParticipationForm";
 import ElectionManagementPlatform from "./pages/Election/ElectionManagementPlatform";
 import ElectionForm from "./pages/Election/ElectionForm";
 import VotingPage from "./pages/Election/VotingPage";
+import EventGallery from "./pages/EventGallery ";
 
 export default function App() {
   const location = useLocation();
@@ -46,8 +47,7 @@ export default function App() {
     location.pathname === "/participationForm" ||
     location.pathname.startsWith("/member-details/") ||
     location.pathname === "/electionhome" ||
-    location.pathname === "/electionManagementplatform" ||
-    location.pathname === "/electionForm"||
+    location.pathname === "/electionForm" ||
     location.pathname === "/votingpage";
 
   return (
@@ -64,9 +64,15 @@ export default function App() {
         <Route path="/regeve-admin" element={<RegisterForm />} />
         <Route path="/luckydraw" element={<LuckyDraw />} />
         <Route path="/service/registration" element={<EventRegistration />} />
-        <Route path="/service/luckydraw-system-page" element={<LuckydrawFooter />}/>
+        <Route
+          path="/service/luckydraw-system-page"
+          element={<LuckydrawFooter />}
+        />
         <Route path="/service/food-management" element={<FoodManagement />} />
-        <Route path="/service/dashboard-system-page" element={<DashboardSystemPage />} />
+        <Route
+          path="/service/dashboard-system-page"
+          element={<DashboardSystemPage />}
+        />
         <Route path="/member-details/:Member_ID" element={<UserDetail />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/help" element={<HelpCenter />} />
@@ -78,9 +84,13 @@ export default function App() {
         <Route path="/electionhome" element={<ElectionHome />} />
         <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
         <Route path="/participationForm" element={<ParticipationForm />} />
-        <Route path="/electionManagementplatform"element={<ElectionManagementPlatform />}/>
+        <Route
+          path="/electionManagementplatform"
+          element={<ElectionManagementPlatform />}
+        />
         <Route path="/electionForm" element={<ElectionForm />} />
         <Route path="/votingpage" element={<VotingPage />} />
+        <Route path="/eventgallery" element={<EventGallery />} />
       </Routes>
 
       {!hideLayout && <Footer />}
