@@ -1,15 +1,15 @@
  import React, { useState, useRef, useEffect } from "react";
 import { FaWhatsapp, FaTelegram } from "react-icons/fa";
-import { 
-  Search, 
-  Filter, 
-  Mail, 
-  CheckCircle, 
-  XCircle, 
-  User, 
-  Phone, 
-  IdCard,
-  Calendar,
+import {
+  Search,
+  Filter,
+  Mail,
+  CheckCircle,
+  XCircle,
+  User,
+  Phone,
+  Clock,
+  Hash,
   MapPin,
   Download,
   Users,
@@ -19,88 +19,73 @@ import {
   AlertCircle,
   ArrowLeft,
   Send,
-  MoreVertical
+  MoreVertical,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const ParticipationForm = () => {
+const participationForm = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const [showAlert, setShowAlert] = useState({ show: false, message: "", type: "success" });
+  const [showAlert, setShowAlert] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
   const [activeShareMenu, setActiveShareMenu] = useState(null);
 
   const shareMenuRef = useRef(null);
 
-  const [participants, setParticipants] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john.doe@example.com",
-      phone: "+91 98765 43210",
-      idNumber: "1234 5678 9012",
-      idType: "aadhar",
-      address: "123 Main Street, Bangalore, Karnataka - 560001",
-      registrationDate: "2024-01-15",
-      verified: false,
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face",
-      constituency: "Bangalore South",
-    },
-    {
-      id: 2,
-      name: "Priya Sharma",
-      email: "priya.sharma@example.com",
-      phone: "+91 87654 32109",
-      idNumber: "ABCD1234567",
-      idType: "voterid",
-      address: "456 Park Avenue, Mumbai, Maharashtra - 400001",
-      registrationDate: "2024-01-16",
-      verified: true,
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=60&h=60&fit=crop&crop=face",
-      constituency: "Mumbai North",
-    },
-    {
-      id: 3,
-      name: "Alex Chen",
-      email: "alex.chen@example.com",
-      phone: "+91 76543 21098",
-      idNumber: "P1234567",
-      idType: "passport",
-      address: "789 Oak Road, Delhi - 110001",
-      registrationDate: "2024-01-14",
-      verified: false,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face",
-      constituency: "Delhi Central",
-    },
-    {
-      id: 4,
-      name: "Maria Garcia",
-      email: "maria.garcia@example.com",
-      phone: "+91 65432 10987",
-      idNumber: "DL0420231234567",
-      idType: "driving",
-      address: "321 Pine Lane, Chennai, Tamil Nadu - 600001",
-      registrationDate: "2024-01-17",
-      verified: false,
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face",
-      constituency: "Chennai Central",
-    },
-  ]);
+  const [participants, setParticipants] = useState([]);
 
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
 
   // Close share menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target)) {
-        setActiveShareMenu(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    fetchParticipants();
   }, []);
+
+  const fetchParticipants = async () => {
+    try {
+      const response = await axios.get(
+        "https://api.regeve.in/api/election-participants?populate=*"
+      );
+
+      const apiData = response.data.data; // this is the real array
+
+      if (Array.isArray(apiData)) {
+        const formatted = apiData.map((item) => {
+          // Extract real image
+          const photoUrl = item.Photo?.url
+            ? `https://api.regeve.in${item.Photo.url}`
+            : `https://api.dicebear.com/7.x/initials/svg?seed=${item.name}`;
+
+          return {
+            id: item.id,
+            name: item.name,
+            email: item.email,
+            phone: item.phone_number,
+            whatsapp: item.whatsapp_number,
+            idNumber: item.id_card,
+            idType: "voterid",
+            address: "Not Provided",
+            registrationDate: item.createdAt,
+            verified: item.isVerified,
+            constituency: "Not Assigned",
+
+            // REAL IMAGE from Strapi
+            image: photoUrl,
+          };
+        });
+
+        setParticipants(formatted);
+      }
+    } catch (error) {
+      console.error("Error fetching participants:", error);
+    }
+  };
 
   // Show alert function
   const showAlertMessage = (message, type = "success") => {
@@ -111,49 +96,75 @@ const ParticipationForm = () => {
   };
 
   // Toggle verification with confirmation
-  const toggleVerifyParticipant = (id, name) => {
-    const isCurrentlyVerified = participants.find(p => p.id === id)?.verified;
+  const toggleVerifyParticipant = async (id, name) => {
+    const isCurrentlyVerified = participants.find((p) => p.id === id)?.verified;
     const action = isCurrentlyVerified ? "unverify" : "verify";
-    
+
     if (window.confirm(`Are you sure you want to ${action} ${name}?`)) {
-      setParticipants(prev =>
-        prev.map(p => {
-          if (p.id === id) {
-            const newStatus = !p.verified;
-            showAlertMessage(
-              `${p.name} ${newStatus ? "verified" : "unverified"} successfully`,
-              newStatus ? "success" : "warning"
-            );
-            return { ...p, verified: newStatus };
+      try {
+        await axios.put(
+          `https://api.regeve.in/api/election-participants/${id}`,
+          {
+            isVerified: !isCurrentlyVerified,
           }
-          return p;
-        })
-      );
+        );
+
+        setParticipants((prev) =>
+          prev.map((p) =>
+            p.id === id ? { ...p, verified: !isCurrentlyVerified } : p
+          )
+        );
+
+        showAlertMessage(
+          `${name} ${
+            !isCurrentlyVerified ? "verified" : "unverified"
+          } successfully`
+        );
+      } catch (error) {
+        showAlertMessage("Failed to update verification", "error");
+        console.error(error);
+      }
     }
   };
 
   // Send verification message
   const sendVerification = (participant, method) => {
     const electionLink = "https://election-portal.example.com/vote";
-    const votingId = `VOTE${participant.id.toString().padStart(6, '0')}`;
-    
+    const votingId = `VOTE${participant.id.toString().padStart(6, "0")}`;
+
     const message = `🏛️ Election Commission Verification\n\nDear ${participant.name},\n\n✅ Your election participation has been VERIFIED!\n\n📋 Your Details:\n• Voter ID: ${votingId}\n• Constituency: ${participant.constituency}\n\n🔗 Election Portal: ${electionLink}\n\n🗳️ Important Dates:\n• Voting Period: March 15-20, 2024\n• Results Declaration: March 25, 2024\n\nPlease keep your voting credentials secure.\n\nBest regards,\nElection Commission of India`;
 
-    if (method === 'email') {
-      const subject = "✅ Election Verification Complete - You Are Eligible to Vote!";
-      const mailtoLink = `mailto:${participant.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+    if (method === "email") {
+      const subject =
+        "✅ Election Verification Complete - You Are Eligible to Vote!";
+      const mailtoLink = `mailto:${
+        participant.email
+      }?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
+        message
+      )}`;
       window.location.href = mailtoLink;
       showAlertMessage(`Email sent to ${participant.name}`, "success");
-    } else if (method === 'whatsapp') {
-      const whatsappUrl = `https://wa.me/${participant.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-      showAlertMessage(`WhatsApp message sent to ${participant.name}`, "success");
-    } else if (method === 'telegram') {
-      const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(electionLink)}&text=${encodeURIComponent(message)}`;
-      window.open(telegramUrl, '_blank');
-      showAlertMessage(`Telegram message sent to ${participant.name}`, "success");
+    } else if (method === "whatsapp") {
+      const whatsappUrl = `https://wa.me/${participant.phone.replace(
+        /\D/g,
+        ""
+      )}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, "_blank");
+      showAlertMessage(
+        `WhatsApp message sent to ${participant.name}`,
+        "success"
+      );
+    } else if (method === "telegram") {
+      const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(
+        electionLink
+      )}&text=${encodeURIComponent(message)}`;
+      window.open(telegramUrl, "_blank");
+      showAlertMessage(
+        `Telegram message sent to ${participant.name}`,
+        "success"
+      );
     }
-    
+
     setActiveShareMenu(null);
   };
 
@@ -165,8 +176,8 @@ const ParticipationForm = () => {
 
   // Save edit
   const saveEdit = () => {
-    setParticipants(prev =>
-      prev.map(p => p.id === editingId ? { ...p, ...editForm } : p)
+    setParticipants((prev) =>
+      prev.map((p) => (p.id === editingId ? { ...p, ...editForm } : p))
     );
     setEditingId(null);
     showAlertMessage("Participant updated successfully", "success");
@@ -179,15 +190,20 @@ const ParticipationForm = () => {
   };
 
   const filteredParticipants = participants.filter((p) => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-                         p.email.toLowerCase().includes(search.toLowerCase()) ||
-                         p.idNumber.toLowerCase().includes(search.toLowerCase()) ||
-                         p.constituency.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = 
-      filter === "all" ? true :
-      filter === "verified" ? p.verified :
-      filter === "pending" ? !p.verified : true;
-    
+    const matchesSearch =
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.email.toLowerCase().includes(search.toLowerCase()) ||
+      p.idNumber.toLowerCase().includes(search.toLowerCase()) ||
+      p.constituency.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter =
+      filter === "all"
+        ? true
+        : filter === "verified"
+        ? p.verified
+        : filter === "pending"
+        ? !p.verified
+        : true;
+
     return matchesSearch && matchesFilter;
   });
 
@@ -200,7 +216,7 @@ const ParticipationForm = () => {
       aadhar: "bg-blue-50 text-blue-700 border border-blue-100",
       voterid: "bg-green-50 text-green-700 border border-green-100",
       passport: "bg-purple-50 text-purple-700 border border-purple-100",
-      driving: "bg-amber-50 text-amber-700 border border-amber-100"
+      driving: "bg-amber-50 text-amber-700 border border-amber-100",
     };
     return colors[type] || "bg-gray-50 text-gray-700 border border-gray-100";
   };
@@ -210,15 +226,17 @@ const ParticipationForm = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Alert Messages */}
         {showAlert.show && (
-          <div className={`mb-6 p-4 rounded-xl border ${
-            showAlert.type === 'success' 
-              ? 'bg-green-50 border-green-200 text-green-700' 
-              : showAlert.type === 'error' 
-              ? 'bg-red-50 border-red-200 text-red-700'
-              : showAlert.type === 'warning'
-              ? 'bg-amber-50 border-amber-200 text-amber-700'
-              : 'bg-blue-50 border-blue-200 text-blue-700'
-          } shadow-sm animate-fadeIn`}>
+          <div
+            className={`mb-6 p-4 rounded-xl border ${
+              showAlert.type === "success"
+                ? "bg-green-50 border-green-200 text-green-700"
+                : showAlert.type === "error"
+                ? "bg-red-50 border-red-200 text-red-700"
+                : showAlert.type === "warning"
+                ? "bg-amber-50 border-amber-200 text-amber-700"
+                : "bg-blue-50 border-blue-200 text-blue-700"
+            } shadow-sm animate-fadeIn`}
+          >
             <div className="flex items-center gap-3">
               <AlertCircle className="w-5 h-5" />
               <p className="font-medium">{showAlert.message}</p>
@@ -230,7 +248,7 @@ const ParticipationForm = () => {
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-6">
             <button
-              onClick={() => navigate('/candidate-dashboard')}
+              onClick={() => navigate("/candidate-dashboard")}
               className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white rounded-xl border border-gray-200 hover:bg-gray-50 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.05)]"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -247,7 +265,7 @@ const ParticipationForm = () => {
                 Manage voter verification and communication
               </p>
             </div>
-            
+
             <button className="px-5 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 flex items-center gap-2 text-sm font-medium bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.05)]">
               <Download className="w-4 h-4" />
               Export Data
@@ -261,8 +279,12 @@ const ParticipationForm = () => {
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)] transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Voters</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{totalCount}</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  Total Voters
+                </p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">
+                  {totalCount}
+                </p>
               </div>
               <div className="p-3 bg-blue-50 rounded-xl">
                 <Users className="w-6 h-6 text-blue-600" />
@@ -275,7 +297,9 @@ const ParticipationForm = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Verified</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{verifiedCount}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">
+                  {verifiedCount}
+                </p>
                 <p className="text-green-600 text-xs font-medium mt-2">
                   {((verifiedCount / totalCount) * 100).toFixed(1)}% verified
                 </p>
@@ -287,17 +311,19 @@ const ParticipationForm = () => {
           </div>
 
           {/* Pending Card */}
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)] transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Pending</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{pendingCount}</p>
-              </div>
-              <div className="p-3 bg-amber-50 rounded-xl">
-                <XCircle className="w-6 h-6 text-amber-600" />
-              </div>
-            </div>
-          </div>
+         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)] transition-all duration-300">
+  <div className="flex items-center justify-between">
+    <div>
+      <p className="text-gray-600 text-sm font-medium">Pending</p>
+      <p className="text-3xl font-bold text-gray-900 mt-2">
+        {pendingCount}
+      </p>
+    </div>
+    <div className="p-3 bg-amber-50 rounded-xl">
+      <Clock className="w-6 h-6 text-amber-600" />
+    </div>
+  </div>
+</div>
         </div>
 
         {/* Combined Search and Actions Card */}
@@ -316,7 +342,7 @@ const ParticipationForm = () => {
                   className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all duration-200 bg-white"
                 />
               </div>
-              
+
               {/* Filter Dropdown */}
               <div className="relative min-w-[200px]">
                 <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -338,194 +364,185 @@ const ParticipationForm = () => {
         {/* Participants Table */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
-                <tr>
-                  <th className="p-6 text-left text-sm font-semibold text-gray-700">Voter Information</th>
-                  <th className="p-6 text-left text-sm font-semibold text-gray-700">Contact Details</th>
-                  <th className="p-6 text-left text-sm font-semibold text-gray-700">ID Verification</th>
-                  <th className="p-6 text-left text-sm font-semibold text-gray-700">Registration</th>
-                  <th className="p-6 text-left text-sm font-semibold text-gray-700">Verification Status</th>
-                  <th className="p-6 text-left text-sm font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
+           <table className="w-full">
+  <thead className="bg-gray-50 border-b border-gray-200">
+    <tr>
+      <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Voter</th>
+      <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Contact</th>
+      <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID Info</th>
+      <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+      <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+    </tr>
+  </thead>
 
-              <tbody className="divide-y divide-gray-100">
-                {filteredParticipants.map((participant) => (
-                  <tr 
-                    key={participant.id} 
-                    className="hover:bg-blue-50/10 transition-all duration-200"
+  <tbody className="divide-y divide-gray-100">
+    {filteredParticipants.map((participant) => (
+      <tr 
+        key={participant.id} 
+        className="hover:bg-blue-50/30 transition-colors duration-150"
+      >
+        {/* Voter Information */}
+        <td className="py-5 px-6">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <img
+                src={participant.image}
+                alt={participant.name}
+                className="w-10 h-10 rounded-lg object-cover border border-gray-200"
+              />
+              {participant.verified && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                  <Check className="w-2.5 h-2.5 text-white" />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-md font-medium text-gray-900 truncate">{participant.name}</p>
+              <div className="flex items-center mt-1 space-x-3">
+                <span className="inline-flex items-center text-xs text-gray-500">
+                  <span className="font-bold px-1">ID: </span> {participant.id.toString().padStart(4, '0')}
+                </span>
+                
+              </div>
+            </div>
+          </div>
+        </td>
+        
+        {/* Contact Details */}
+        <td className="py-5 px-6">
+          <div className="space-y-2">
+            <div className="flex items-center">
+              <Mail className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+              <span className="text-sm text-gray-700 truncate max-w-[160px]">{participant.email}</span>
+            </div>
+            <div className="flex items-center">
+              <Phone className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+              <span className="text-sm text-gray-700">{participant.phone}</span>
+            </div>
+          </div>
+        </td>
+        
+        {/* ID Information */}
+        <td className="py-5 px-6">
+          <div className="space-y-1.5">
+            <div className="flex items-center space-x-2">
+              <div className={`px-2.5 py-1 rounded-md text-xs font-medium ${getIDTypeColor(participant.idType)}`}>
+                {participant.idType}
+              </div>
+            </div>
+            <p className="text-xs text-gray-600 font-mono bg-gray-50 px-3 py-1.5 rounded-md truncate max-w-[180px]">
+              {participant.idNumber}
+            </p>
+            <p className="text-xs text-gray-500">
+              Registered {new Date(participant.registrationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </p>
+          </div>
+        </td>
+        
+        {/* Verification Status */}
+        <td className="py-5 px-6">
+          <div className="flex flex-col space-y-3">
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${participant.verified ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+              <span className={`text-sm font-medium ${participant.verified ? 'text-green-700' : 'text-yellow-700'}`}>
+                {participant.verified ? 'Verified' : 'Pending'}
+              </span>
+            </div>
+            
+            {/* Fixed Toggle Switch */}
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => toggleVerifyParticipant(participant.id, participant.name)}
+                className="relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                role="switch"
+                aria-checked={participant.verified}
+              >
+                <span className="sr-only">
+                  {participant.verified ? "Mark as unverified" : "Mark as verified"}
+                </span>
+                <span
+                  className={`pointer-events-none relative inline-block h-5 w-10 transform rounded-full shadow-sm transition duration-200 ease-in-out ${
+                    participant.verified ? 'bg-green-500' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`absolute left-0.5 top-0.5 h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out ${
+                      participant.verified ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </span>
+              </button>
+              
+              <span className="text-xs text-gray-600 font-medium">
+                {participant.verified ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+            
+            <p className="text-xs text-gray-500">
+              {participant.verified ? 'Voter is verified' : 'Awaiting verification'}
+            </p>
+          </div>
+        </td>
+        
+        {/* Actions */}
+        <td className="py-5 px-6">
+          <div className="flex items-center space-x-2">
+            {/* Edit Button */}
+            <button
+              onClick={() => startEditing(participant)}
+              className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Edit voter details"
+            >
+              <Edit2 className="w-4 h-4" />
+            </button>
+            
+            {/* Share Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setActiveShareMenu(activeShareMenu === participant.id ? null : participant.id)}
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors"
+                title="Share verification"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+              
+              {activeShareMenu === participant.id && (
+                <div className="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                  <div className="px-3 py-2 border-b border-gray-100">
+                    <p className="text-xs font-medium text-gray-700">Send Verification</p>
+                  </div>
+                  <button
+                    onClick={() => sendVerification(participant, 'email')}
+                    className="w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                   >
-                    <td className="p-6">
-                      <div className="flex items-center gap-4">
-                        <img
-                          src={participant.image}
-                          alt={participant.name}
-                          className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow-sm"
-                        />
-                        <div>
-                          <p className="font-semibold text-gray-900">{participant.name}</p>
-                          <p className="text-xs text-gray-500 mt-1">ID: #{participant.id.toString().padStart(4, '0')}</p>
-                          <div className="flex items-center gap-1 mt-2">
-                            <MapPin className="w-3 h-3 text-blue-500" />
-                            <span className="text-xs text-blue-600 font-medium">
-                              {participant.constituency}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    
-                    <td className="p-6">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-gray-50 rounded-lg">
-                            <Mail className="w-4 h-4 text-gray-500" />
-                          </div>
-                          <span className="text-sm text-gray-700">{participant.email}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-gray-50 rounded-lg">
-                            <Phone className="w-4 h-4 text-gray-500" />
-                          </div>
-                          <span className="text-sm text-gray-700">{participant.phone}</span>
-                        </div>
-                      </div>
-                    </td>
-                    
-                    <td className="p-6">
-                      <div className="space-y-2">
-                        <span className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${getIDTypeColor(participant.idType)}`}>
-                          <IdCard className="w-4 h-4" />
-                          {participant.idType.toUpperCase()}
-                        </span>
-                        <p className="text-sm text-gray-600 font-mono bg-gray-50 px-3 py-2 rounded-lg">
-                          {participant.idNumber}
-                        </p>
-                      </div>
-                    </td>
-                    
-                    <td className="p-6">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-gray-50 rounded-lg">
-                            <Calendar className="w-4 h-4 text-gray-500" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {new Date(participant.registrationDate).toLocaleDateString()}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-0.5">Registered Date</p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    
-                    <td className="p-6">
-                      <div className="flex flex-col items-start gap-2">
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-gray-700">
-                            {participant.verified ? "Verified Voter" : "Pending Verification"}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => toggleVerifyParticipant(participant.id, participant.name)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                            participant.verified 
-                              ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
-                              : 'bg-gradient-to-r from-gray-300 to-gray-400'
-                          }`}
-                        >
-                          <span className="sr-only">
-                            {participant.verified ? "Disable verification" : "Enable verification"}
-                          </span>
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all duration-300 ${
-                              participant.verified ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
-                        <span className="text-xs text-gray-500">
-                          Click toggle to {participant.verified ? "revoke" : "grant"} verification
-                        </span>
-                      </div>
-                    </td>
-                    
-                    <td className="p-6">
-                      <div className="flex items-center gap-2">
-                        {/* Edit Button */}
-                        <button
-                          onClick={() => startEditing(participant)}
-                          className="p-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-2"
-                          title="Edit Details"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        
-                        {/* Share Menu */}
-                        <div className="relative" ref={shareMenuRef}>
-                          <button
-                            onClick={() => setActiveShareMenu(activeShareMenu === participant.id ? null : participant.id)}
-                            className="p-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-2"
-                            title="Share Verification"
-                          >
-                            {activeShareMenu === participant.id ? (
-                              <Send className="w-4 h-4" />
-                            ) : (
-                              <Share2 className="w-4 h-4" />
-                            )}
-                          </button>
-                          
-                          {activeShareMenu === participant.id && (
-                            <div className="absolute right-0 mt-2 bg-white rounded-xl border border-gray-200 shadow-lg z-10 min-w-[160px]">
-                              <div className="p-2 border-b border-gray-100">
-                                <p className="text-xs font-medium text-gray-700 px-2 py-1">Send Verification</p>
-                              </div>
-                              <button
-                                onClick={() => sendVerification(participant, 'email')}
-                                className="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 transition-colors"
-                              >
-                                <div className="p-1.5 bg-blue-50 rounded-lg">
-                                  <Mail className="w-4 h-4 text-blue-600" />
-                                </div>
-                                <div className="flex-1">
-                                  <p className="font-medium text-gray-900">Email</p>
-                                  <p className="text-xs text-gray-500">Send via email</p>
-                                </div>
-                              </button>
-                              <button
-                                onClick={() => sendVerification(participant, 'whatsapp')}
-                                className="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 transition-colors"
-                              >
-                                <div className="p-1.5 bg-green-50 rounded-lg">
-                                  <FaWhatsapp className="w-4 h-4 text-green-600" />
-                                </div>
-                                <div className="flex-1">
-                                  <p className="font-medium text-gray-900">WhatsApp</p>
-                                  <p className="text-xs text-gray-500">Send via WhatsApp</p>
-                                </div>
-                              </button>
-                              <button
-                                onClick={() => sendVerification(participant, 'telegram')}
-                                className="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                              >
-                                <div className="p-1.5 bg-blue-100 rounded-lg">
-                                  <FaTelegram className="w-4 h-4 text-blue-500" />
-                                </div>
-                                <div className="flex-1">
-                                  <p className="font-medium text-gray-900">Telegram</p>
-                                  <p className="text-xs text-gray-500">Send via Telegram</p>
-                                </div>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    <Mail className="w-4 h-4 mr-3 text-gray-400" />
+                    Send via Email
+                  </button>
+                  <button
+                    onClick={() => sendVerification(participant, 'whatsapp')}
+                    className="w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                  >
+                    <FaWhatsapp className="w-4 h-4 mr-3 text-green-500" />
+                    Send via WhatsApp
+                  </button>
+                  <button
+                    onClick={() => sendVerification(participant, 'telegram')}
+                    className="w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                  >
+                    <FaTelegram className="w-4 h-4 mr-3 text-blue-500" />
+                    Send via Telegram
+                  </button>
+                </div>
+              )}
+            </div>
+            
+           
+          </div>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
           </div>
 
           {filteredParticipants.length === 0 && (
@@ -533,9 +550,12 @@ const ParticipationForm = () => {
               <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
                 <User className="w-10 h-10 text-gray-400" />
               </div>
-              <h3 className="text-gray-700 text-lg font-semibold mb-2">No voters found</h3>
+              <h3 className="text-gray-700 text-lg font-semibold mb-2">
+                No voters found
+              </h3>
               <p className="text-gray-500 max-w-md mx-auto">
-                Try adjusting your search criteria or filter to find what you're looking for
+                Try adjusting your search criteria or filter to find what you're
+                looking for
               </p>
             </div>
           )}
@@ -546,7 +566,9 @@ const ParticipationForm = () => {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Edit Voter Details</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Edit Voter Details
+                </h3>
                 <button
                   onClick={cancelEdit}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -554,50 +576,66 @@ const ParticipationForm = () => {
                   <XCircle className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Full Name
+                  </label>
                   <input
                     type="text"
-                    value={editForm.name || ''}
-                    onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                    value={editForm.name || ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, name: e.target.value })
+                    }
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
                     placeholder="Enter full name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address
+                  </label>
                   <input
                     type="email"
-                    value={editForm.email || ''}
-                    onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                    value={editForm.email || ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, email: e.target.value })
+                    }
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
                     placeholder="Enter email address"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
+                  </label>
                   <input
                     type="tel"
-                    value={editForm.phone || ''}
-                    onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                    value={editForm.phone || ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, phone: e.target.value })
+                    }
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
                     placeholder="Enter phone number"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Constituency</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Constituency
+                  </label>
                   <input
                     type="text"
-                    value={editForm.constituency || ''}
-                    onChange={(e) => setEditForm({...editForm, constituency: e.target.value})}
+                    value={editForm.constituency || ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, constituency: e.target.value })
+                    }
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
                     placeholder="Enter constituency"
                   />
                 </div>
               </div>
-              
+
               <div className="flex justify-end gap-3">
                 <button
                   onClick={cancelEdit}
@@ -621,19 +659,28 @@ const ParticipationForm = () => {
         <div className="mt-6 bg-white rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="text-sm text-gray-600">
-              Showing <span className="font-semibold text-gray-900">{filteredParticipants.length}</span> of{" "}
-              <span className="font-semibold text-gray-900">{totalCount}</span> registered voters
+              Showing{" "}
+              <span className="font-semibold text-gray-900">
+                {filteredParticipants.length}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-gray-900">{totalCount}</span>{" "}
+              registered voters
             </div>
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 <span className="text-gray-600">Verified:</span>
-                <span className="font-semibold text-gray-900">{verifiedCount}</span>
+                <span className="font-semibold text-gray-900">
+                  {verifiedCount}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-amber-500"></div>
                 <span className="text-gray-600">Pending:</span>
-                <span className="font-semibold text-gray-900">{pendingCount}</span>
+                <span className="font-semibold text-gray-900">
+                  {pendingCount}
+                </span>
               </div>
             </div>
           </div>
@@ -643,4 +690,4 @@ const ParticipationForm = () => {
   );
 };
 
-export default ParticipationForm;
+export default participationForm;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+ import React, { useState, useEffect } from "react";
 import {
   Search,
   Users,
@@ -11,118 +11,179 @@ import {
   UserPlus,
   TrendingUp,
 } from "lucide-react";
+import axios from "axios";
 
 const ElectionDashboard = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [participants, setParticipants] = useState([]);
+  const [candidates, setCandidates] = useState([]);
 
-  const [participants, setParticipants] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      image:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
-      email: "john.doe@example.com",
-      registrationDate: "2024-01-15",
-      role: "Candidate",
-      votes: 1250,
-      party: "National Progressive",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Priya Sharma",
-      image:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop",
-      email: "priya.sharma@example.com",
-      registrationDate: "2024-01-16",
-      role: "Voter",
-      votes: 0,
-      party: null,
-      status: "registered",
-    },
-    {
-      id: 3,
-      name: "Alex Chen",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-      email: "alex.chen@example.com",
-      registrationDate: "2024-01-14",
-      role: "Candidate",
-      votes: 980,
-      party: "Unity Alliance",
-      status: "active",
-    },
-    {
-      id: 4,
-      name: "Maria Garcia",
-      image:
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
-      email: "maria.garcia@example.com",
-      registrationDate: "2024-01-17",
-      role: "Voter",
-      votes: 0,
-      party: null,
-      status: "registered",
-    },
-    {
-      id: 5,
-      name: "David Wilson",
-      image:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
-      email: "david.wilson@example.com",
-      registrationDate: "2024-01-13",
-      role: "Candidate",
-      votes: 2100,
-      party: "Democratic Front",
-      status: "active",
-    },
-    {
-      id: 6,
-      name: "Sarah Johnson",
-      image:
-        "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop",
-      email: "sarah.johnson@example.com",
-      registrationDate: "2024-01-18",
-      role: "Candidate",
-      votes: 1875,
-      party: "Green Initiative",
-      status: "active",
-    },
-  ]);
+  // Use unique identifiers to prevent duplication
+  const allPeople = React.useMemo(() => {
+    const people = [];
+    const seenEmails = new Set(); // Use email to deduplicate
+    
+    // Add candidates first (they take priority)
+    candidates.forEach((candidate) => {
+      if (!seenEmails.has(candidate.email)) {
+        seenEmails.add(candidate.email);
+        people.push({
+          ...candidate,
+          id: `candidate-${candidate.documentId || candidate.id}`, // Use documentId for unique ID
+          role: "Candidate",
+        });
+      }
+    });
+    
+    // Add participants who are NOT already candidates
+    participants.forEach((participant) => {
+      if (!seenEmails.has(participant.email)) {
+        seenEmails.add(participant.email);
+        people.push({
+          ...participant,
+          id: `participant-${participant.id}`,
+          role: "Voter",
+        });
+      }
+    });
+    
+    return people;
+  }, [participants, candidates]);
 
-  const filtered = participants.filter((p) => {
+  // Calculate deduplicated counts
+  const totalCandidates = React.useMemo(() => {
+    const seenEmails = new Set();
+    return candidates.filter(candidate => {
+      if (!seenEmails.has(candidate.email)) {
+        seenEmails.add(candidate.email);
+        return true;
+      }
+      return false;
+    }).length;
+  }, [candidates]);
+
+  const totalParticipants = participants.length;
+  
+  const totalVoters = React.useMemo(() => {
+    // Get all candidate emails (deduplicated)
+    const candidateEmails = new Set();
+    candidates.forEach(candidate => {
+      candidateEmails.add(candidate.email);
+    });
+    
+    // Count participants who are NOT candidates
+    return participants.filter(p => !candidateEmails.has(p.email)).length;
+  }, [participants, candidates]);
+
+  const totalVotes = React.useMemo(() => {
+    const seenEmails = new Set();
+    return candidates.reduce((sum, candidate) => {
+      if (!seenEmails.has(candidate.email)) {
+        seenEmails.add(candidate.email);
+        return sum + (candidate.votes || 0);
+      }
+      return sum;
+    }, 0);
+  }, [candidates]);
+
+  // -----------------------------
+  // FETCH PARTICIPANTS & CANDIDATES
+  // -----------------------------
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch Participants
+        const participantRes = await axios.get(
+          "https://api.regeve.in/api/election-participants?populate=*"
+        );
+
+        const participantArray = participantRes.data.data || [];
+
+        const formattedParticipants = participantArray.map((item) => {
+          const photoUrl = item.attributes?.photo?.data?.attributes?.url
+            ? `https://api.regeve.in${item.attributes.photo.data.attributes.url}`
+            : `https://api.dicebear.com/7.x/initials/svg?seed=${item.attributes?.name || "User"}`;
+
+          return {
+            id: item.id,
+            documentId: item.documentId,
+            name: item.attributes?.name || "Unknown",
+            email: item.attributes?.email || "",
+            registrationDate: item.attributes?.createdAt || item.createdAt,
+            image: photoUrl,
+            votes: 0,
+            party: null,
+            isVerified: item.attributes?.isVerified || false,
+          };
+        });
+
+        // Fetch Candidates
+        const candidateRes = await axios.get(
+          "https://api.regeve.in/api/candidates?populate[photo]=true&populate[election_candidate_position]=true"
+        );
+
+        const candidateArray = candidateRes.data.data || [];
+        const formattedCandidates = candidateArray.map((item) => {
+          // Handle both Strapi v4 and v5 structures
+          const attributes = item.attributes || item;
+          const photoData = attributes?.photo?.data?.attributes || attributes?.photo;
+          const positionData = attributes?.election_candidate_position?.data?.attributes || 
+                            attributes?.election_candidate_position;
+          
+          const photoUrl = photoData?.url
+            ? `https://api.regeve.in${photoData.url}`
+            : `https://api.dicebear.com/7.x/initials/svg?seed=${attributes?.name || "Candidate"}`;
+
+          return {
+            id: item.id,
+            documentId: item.documentId,
+            name: attributes?.name || "Unknown Candidate",
+            email: attributes?.email || "",
+            registrationDate: attributes?.createdAt || item.createdAt,
+            image: photoUrl,
+            votes: attributes?.votes || 0,
+            party: attributes?.party || null,
+            position: positionData?.Position || "Candidate",
+          };
+        });
+
+        // Filter only verified participants
+        const verifiedParticipants = formattedParticipants.filter(
+          (p) => p.isVerified === true
+        );
+
+        setParticipants(verifiedParticipants);
+        setCandidates(formattedCandidates);
+      } catch (error) {
+        console.error("API Fetch Error:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Filtering Logic
+  const filteredList = allPeople.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.email.toLowerCase().includes(search.toLowerCase()) ||
-      (p.party && p.party.toLowerCase().includes(search.toLowerCase()));
+      (p.party && p.party.toLowerCase().includes(search.toLowerCase())) ||
+      (p.position && p.position.toLowerCase().includes(search.toLowerCase()));
+
     const matchesFilter =
-      filter === "all"
-        ? true
-        : filter === "candidate"
-        ? p.role === "Candidate"
-        : filter === "voter"
-        ? p.role === "Voter"
-        : true;
+      filter === "all" ||
+      (filter === "candidate" && p.role === "Candidate") ||
+      (filter === "voter" && p.role === "Voter");
 
     return matchesSearch && matchesFilter;
   });
 
-  const totalParticipants = participants.length;
-  const totalCandidates = participants.filter(
-    (p) => p.role === "Candidate"
-  ).length;
-  const totalVoters = participants.filter((p) => p.role === "Voter").length;
-  const totalVotes = participants.reduce((sum, p) => sum + p.votes, 0);
-  const leadingCandidate = participants
-    .filter((p) => p.role === "Candidate")
-    .sort((a, b) => b.votes - a.votes)[0];
-
   return (
     <div className="pt-10 px-4 md:px-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-10 ">
-        <div className="flex flex-col lg:flex-row  lg:items-center lg:justify-between mb-6">
+      <div className="mb-10">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Election Analytics Dashboard
@@ -138,13 +199,8 @@ const ElectionDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-60 ml-45"> 
-          <div
-            className="bg-white  p-6 rounded-2xl border h-60 w-70 border-gray-100 
-shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)]
-hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)]
-transition-all duration-300"
-          >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)] transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 rounded-xl bg-blue-50">
                 <Users className="w-6 h-6 text-blue-600" />
@@ -152,7 +208,7 @@ transition-all duration-300"
               <span className="text-sm text-green-600 font-medium">+8%</span>
             </div>
             <p className="text-gray-500 text-sm font-medium mb-2">
-              Total Participation
+              Total Participants
             </p>
             <p className="text-3xl font-bold text-gray-900">
               {totalParticipants.toLocaleString()}
@@ -165,10 +221,7 @@ transition-all duration-300"
             </div>
           </div>
 
-          <div className="bg-white p-6 h-60 w-70 rounded-2xl border border-gray-100 
-shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)]
-hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)]
-transition-all duration-300">
+          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)] transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 rounded-xl bg-green-50">
                 <UserCheck className="w-6 h-6 text-green-600" />
@@ -187,10 +240,7 @@ transition-all duration-300">
             </div>
           </div>
 
-          <div className="bg-white p-6 h-60 w-70 rounded-2xl border border-gray-100 
-shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)]
-hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)]
-transition-all duration-300">
+          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_10px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.05),0_15px_25px_rgba(0,0,0,0.12)] transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 rounded-xl bg-purple-50">
                 <Vote className="w-6 h-6 text-purple-600" />
@@ -208,8 +258,6 @@ transition-all duration-300">
               <span>Votes recorded to date</span>
             </div>
           </div>
-
-
         </div>
       </div>
 
@@ -229,11 +277,11 @@ transition-all duration-300">
             <div className="flex items-center gap-4">
               <div className="text-sm text-gray-600">
                 <span className="font-semibold text-gray-900">
-                  {filtered.length}
+                  {filteredList.length}
                 </span>{" "}
                 of{" "}
                 <span className="font-semibold text-gray-900">
-                  {totalParticipants}
+                  {allPeople.length}
                 </span>{" "}
                 participants
               </div>
@@ -249,7 +297,7 @@ transition-all duration-300">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search participants by name, email, or party..."
+                  placeholder="Search participants by name, email, or position..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 placeholder-gray-500 shadow-sm"
@@ -282,7 +330,7 @@ transition-all duration-300">
                   Participant
                 </th>
                 <th className="p-6 text-left text-sm font-semibold text-gray-700">
-                  Role & Affiliation
+                  Role & Position
                 </th>
                 <th className="p-6 text-left text-sm font-semibold text-gray-700">
                   Registration
@@ -294,11 +342,12 @@ transition-all duration-300">
             </thead>
 
             <tbody className="divide-y divide-gray-200/50">
-              {filtered.map((p) => (
+              {filteredList.map((p) => (
                 <tr
                   key={p.id}
                   className="hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-100/30 transition-all duration-200"
                 >
+                  {/* Participant Column */}
                   <td className="p-6">
                     <div className="flex items-center gap-4">
                       <div className="relative">
@@ -309,17 +358,7 @@ transition-all duration-300">
                         />
                         {p.role === "Candidate" && (
                           <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
-                            <svg
-                              className="w-3.5 h-3.5 text-white"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
+                            <UserCheck className="w-3.5 h-3.5 text-white" />
                           </div>
                         )}
                       </div>
@@ -348,6 +387,8 @@ transition-all duration-300">
                       </div>
                     </div>
                   </td>
+
+                  {/* Role Column */}
                   <td className="p-6">
                     <div className="space-y-2">
                       <span
@@ -359,24 +400,24 @@ transition-all duration-300">
                       >
                         {p.role === "Candidate" ? (
                           <>
-                            <UserCheck className="w-4 h-4 mr-2" />
-                            Candidate
+                            <UserCheck className="w-4 h-4 mr-2" /> Candidate
                           </>
                         ) : (
                           <>
-                            <Users className="w-4 h-4 mr-2" />
-                            Voter
+                            <Users className="w-4 h-4 mr-2" /> Voter
                           </>
                         )}
                       </span>
-                      {p.party && (
+                      {p.position && (
                         <div className="text-sm text-gray-600">
-                          <span className="font-medium">Affiliation:</span>{" "}
-                          {p.party}
+                          <span className="font-medium">Position:</span>{" "}
+                          {p.position}
                         </div>
                       )}
                     </div>
                   </td>
+
+                  {/* Registration Date */}
                   <td className="p-6">
                     <div className="flex items-center gap-3 text-gray-700">
                       <div className="p-2.5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
@@ -399,26 +440,34 @@ transition-all duration-300">
                       </div>
                     </div>
                   </td>
+
+                  {/* Performance / Votes */}
                   <td className="p-6">
                     {p.role === "Candidate" ? (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-gray-600">Votes:</span>
                           <span className="font-bold text-gray-900">
-                            {p.votes.toLocaleString()}
+                            {(p.votes || 0).toLocaleString()}
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full shadow-sm"
                             style={{
-                              width: `${(p.votes / totalVotes) * 100}%`,
+                              width:
+                                totalVotes > 0
+                                  ? `${((p.votes || 0) / totalVotes) * 100}%`
+                                  : "0%",
                             }}
                           ></div>
                         </div>
                         <div className="text-xs text-gray-500">
-                          {((p.votes / totalVotes) * 100).toFixed(1)}% of total
-                          votes
+                          {totalVotes > 0
+                            ? `${(((p.votes || 0) / totalVotes) * 100).toFixed(
+                                1
+                              )}% of total votes`
+                            : "0% of total votes"}
                         </div>
                       </div>
                     ) : (
@@ -435,7 +484,7 @@ transition-all duration-300">
             </tbody>
           </table>
 
-          {filtered.length === 0 && (
+          {filteredList.length === 0 && (
             <div className="text-center py-20">
               <div className="w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
                 <Users className="w-12 h-12 text-gray-400" />
@@ -452,17 +501,17 @@ transition-all duration-300">
         </div>
 
         {/* Footer */}
-        {filtered.length > 0 && (
+        {filteredList.length > 0 && (
           <div className="px-6 py-5 border-t border-gray-200 bg-gradient-to-r from-gray-50/50 to-white">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="text-sm text-gray-600">
                 Showing{" "}
                 <span className="font-semibold text-gray-900">
-                  {filtered.length}
+                  {filteredList.length}
                 </span>{" "}
                 of{" "}
                 <span className="font-semibold text-gray-900">
-                  {totalParticipants}
+                  {allPeople.length}
                 </span>{" "}
                 participants
               </div>
@@ -486,34 +535,6 @@ transition-all duration-300">
           </div>
         )}
       </div>
-
-      {/* Summary Section */}
-      {/* <div className="mt-8 p-6 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 rounded-2xl border border-blue-200/50 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">Election Progress Summary</h3>
-            <p className="text-gray-600 text-sm mt-1">Real-time analytics and participant insights</p>
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{totalVotes.toLocaleString()}</div>
-              <div className="text-sm text-gray-500">Total Votes Cast</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">
-                {((totalVotes / (totalVoters || 1)) * 100).toFixed(1)}%
-              </div>
-              <div className="text-sm text-gray-500">Voter Turnout</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">
-                {(totalVotes / (totalCandidates || 1)).toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-500">Avg Votes per Candidate</div>
-            </div>
-          </div>
-        </div>
-      </div> */}
     </div>
   );
 };
