@@ -1,4 +1,4 @@
- import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
@@ -42,8 +42,6 @@ const VotingPage = ({ token = null }) => {
 
   const [positions, setPositions] = useState([]);
   const [submittedVotes, setSubmittedVotes] = useState({});
-  const [selectedProfile, setSelectedProfile] = useState(null);
-  const [currentView, setCurrentView] = useState("grid");
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -300,37 +298,6 @@ const VotingPage = ({ token = null }) => {
     }
   };
 
-  const handleProfileClick = (candidate) => {
-    if (votingEnded) return;
-
-    const candidatePosition = positions.find((position) =>
-      position.candidates.some((c) => c.id === candidate.id)
-    );
-
-    if (candidatePosition?.submitted) return;
-
-    setSelectedProfile(candidate);
-    setCurrentView("profile");
-  };
-
-  const handleBackToGrid = () => {
-    setCurrentView("grid");
-    setSelectedProfile(null);
-  };
-
-  const handleVoteFromProfile = () => {
-    if (selectedProfile && !votingEnded) {
-      const candidatePosition = positions.find((position) =>
-        position.candidates.some((c) => c.id === selectedProfile.id)
-      );
-
-      if (candidatePosition && !candidatePosition.submitted) {
-        handleVote(selectedProfile.id, candidatePosition.id);
-        handleBackToGrid();
-      }
-    }
-  };
-
   const handleToggleResults = () => {
     setShowResults(!showResults);
   };
@@ -429,7 +396,7 @@ const VotingPage = ({ token = null }) => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <motion.div 
+            <motion.div
               className="flex items-center gap-4"
               whileHover={{ scale: 1.02 }}
             >
@@ -440,7 +407,9 @@ const VotingPage = ({ token = null }) => {
                 <h1 className="text-2xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text">
                   {electionData.electionName}
                 </h1>
-                <p className="text-gray-600 text-sm">{electionData.electionCategory}</p>
+                <p className="text-gray-600 text-sm">
+                  {electionData.electionCategory}
+                </p>
               </div>
             </motion.div>
 
@@ -508,7 +477,7 @@ const VotingPage = ({ token = null }) => {
           </div>
 
           {/* Stats */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -517,10 +486,12 @@ const VotingPage = ({ token = null }) => {
             {[
               { value: positions.length, label: "Positions", color: "blue" },
               { value: totalCandidates, label: "Candidates", color: "green" },
-              { 
-                value: `${Object.values(submittedVotes).filter(Boolean).length}/${positions.length}`, 
-                label: "Voted", 
-                color: "purple" 
+              {
+                value: `${
+                  Object.values(submittedVotes).filter(Boolean).length
+                }/${positions.length}`,
+                label: "Voted",
+                color: "purple",
               },
             ].map((stat, index) => (
               <motion.div
@@ -530,7 +501,9 @@ const VotingPage = ({ token = null }) => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className={`text-3xl font-bold text-${stat.color}-600 mb-1`}>
+                <div
+                  className={`text-3xl font-bold text-${stat.color}-600 mb-1`}
+                >
                   {stat.value}
                 </div>
                 <div className="text-sm text-gray-600">{stat.label}</div>
@@ -542,646 +515,454 @@ const VotingPage = ({ token = null }) => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AnimatePresence mode="wait">
-          {/* Profile View - Modern Centered Design */}
-          {currentView === "profile" && selectedProfile && (
+          {/* Grid View */}
+          {positions.length === 0 ? (
             <motion.div
-              key="profile"
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", damping: 20 }}
-              className="max-w-3xl mx-auto"
+              className="text-center py-16 bg-white rounded-2xl shadow-lg border border-gray-200/50"
             >
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="mb-6"
+              <div className="w-32 h-32 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center mx-auto mb-8">
+                <User className="w-16 h-16 text-blue-500" />
+              </div>
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                No Positions Available
+              </h3>
+              <p className="text-gray-600 text-lg max-w-xl mx-auto mb-8">
+                There are no positions registered for this election yet.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleRefresh}
+                className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
               >
-                <motion.button
-                  whileHover={{ x: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleBackToGrid}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-gray-300 hover:bg-gray-50 transition-all shadow-sm"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                  <span className="font-semibold text-gray-700">Back to Voting</span>
-                </motion.button>
-              </motion.div>
+                Check Again
+              </motion.button>
+            </motion.div>
+          ) : (
+            <div className="space-y-8">
+              {positions.map((position, positionIndex) => {
+                const selectedCandidate = position.candidates.find(
+                  (c) => c.selected
+                );
 
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200/50">
-                {/* Profile Hero - Centered */}
-                <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white pt-12 pb-8 px-6">
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
-                  
+                return (
                   <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 200 }}
-                    className="relative mx-auto w-32 h-32 rounded-full overflow-hidden border-4 border-white/30 shadow-2xl bg-gradient-to-br from-blue-500 to-indigo-600"
+                    key={position.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: positionIndex * 0.1 }}
+                    className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200/50"
                   >
-                    {selectedProfile.photoUrl ? (
-                      <img
-                        src={selectedProfile.photoUrl}
-                        alt={selectedProfile.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-white font-bold text-3xl">
-                          {getInitials(selectedProfile.name)}
-                        </span>
-                      </div>
-                    )}
-                    {selectedProfile.selected && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute bottom-2 right-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-full p-2 shadow-xl border-2 border-white"
-                      >
-                        <CheckCircle className="w-4 h-4 text-white" />
-                      </motion.div>
-                    )}
-                  </motion.div>
-
-                  <div className="text-center mt-6">
-                    <motion.h2
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="text-3xl font-bold mb-2"
-                    >
-                      {selectedProfile.name}
-                    </motion.h2>
-                    <motion.p
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="text-blue-200 font-semibold text-lg mb-4"
-                    >
-                      {selectedProfile.position}
-                    </motion.p>
-                    
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                      className="flex flex-wrap justify-center gap-3"
-                    >
-                      {[
-                        { icon: Briefcase, text: selectedProfile.department },
-                        { icon: Award, text: selectedProfile.experience },
-                        ...(selectedProfile.isWinner ? [{ icon: Crown, text: "Winner", color: "yellow" }] : [])
-                      ].map((item, index) => (
-                        <motion.span
-                          key={index}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.4 + index * 0.1 }}
-                          className={`px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm ${
-                            item.color === "yellow"
-                              ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg"
-                              : "bg-white/10 text-white/90"
-                          }`}
+                    {/* Position Header */}
+                    <div className="bg-gradient-to-r from-blue-50/80 to-white px-6 sm:px-8 py-6 border-b border-blue-100">
+                      <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
+                        <motion.div
+                          className="flex items-center gap-4 sm:gap-6"
+                          whileHover={{ scale: 1.02 }}
                         >
-                          <item.icon className="w-3 h-3 inline mr-2" />
-                          {item.text}
-                        </motion.span>
-                      ))}
-                    </motion.div>
-                  </div>
-                </div>
-
-                {/* Profile Content */}
-                <div className="p-8">
-                  {/* Bio */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="mb-8"
-                  >
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <User className="w-5 h-5 text-blue-600" />
-                      About
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed text-lg">
-                      {selectedProfile.bio}
-                    </p>
-                  </motion.div>
-
-                  {/* Details Grid */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"
-                  >
-                    {[
-                      { icon: MapPin, label: "Location", value: selectedProfile.location, color: "blue" },
-                      { icon: Calendar, label: "Joined", value: selectedProfile.joinDate, color: "green" },
-                      { icon: Mail, label: "Email", value: selectedProfile.email, color: "purple" },
-                      ...(showResults ? [{
-                        icon: Trophy, 
-                        label: "Votes", 
-                        value: voteCounts[selectedProfile.id] || selectedProfile.votes || 0, 
-                        color: "amber",
-                        highlight: true
-                      }] : [])
-                    ].map((item, index) => (
-                      <motion.div
-                        key={item.label}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 + index * 0.1 }}
-                        whileHover={{ y: -5 }}
-                        className={`p-4 rounded-xl border ${
-                          item.highlight
-                            ? "bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200"
-                            : "bg-gray-50 border-gray-200"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg bg-${item.color}-100`}>
-                            <item.icon className={`w-5 h-5 text-${item.color}-600`} />
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center shadow-lg">
+                            <Award className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" />
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm text-gray-600">{item.label}</p>
-                            <p className={`font-bold ${
-                              item.highlight ? "text-amber-700 text-lg" : "text-gray-900"
-                            }`}>
-                              {item.value}
+                          <div>
+                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
+                              {position.position}
+                            </h3>
+                            <p className="text-gray-600 text-sm sm:text-base">
+                              {position.candidates.length} candidate
+                              {position.candidates.length !== 1 ? "s" : ""}
                             </p>
                           </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </motion.div>
+                        </motion.div>
 
-                  {/* Action Buttons */}
-                  {!votingEnded && !submittedVotes[selectedProfile.position] && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 }}
-                      className="border-t border-gray-200 pt-8"
-                    >
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={handleVoteFromProfile}
-                          disabled={selectedProfile.selected}
-                          className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all shadow-lg ${
-                            selectedProfile.selected
-                              ? "bg-gradient-to-r from-emerald-600 to-green-600 cursor-not-allowed"
-                              : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                          } text-white`}
-                        >
-                          {selectedProfile.selected
-                            ? "✓ Candidate Selected"
-                            : "Select This Candidate"}
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={handleBackToGrid}
-                          className="py-4 px-8 rounded-xl font-bold text-lg border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all"
-                        >
-                          Back to Candidates
-                        </motion.button>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Grid View */}
-          {currentView === "grid" && (
-            <motion.div
-              key="grid"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              {positions.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-16 bg-white rounded-2xl shadow-lg border border-gray-200/50"
-                >
-                  <div className="w-32 h-32 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center mx-auto mb-8">
-                    <User className="w-16 h-16 text-blue-500" />
-                  </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                    No Positions Available
-                  </h3>
-                  <p className="text-gray-600 text-lg max-w-xl mx-auto mb-8">
-                    There are no positions registered for this election yet.
-                  </p>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleRefresh}
-                    className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
-                  >
-                    Check Again
-                  </motion.button>
-                </motion.div>
-              ) : (
-                <div className="space-y-8">
-                  {positions.map((position, positionIndex) => {
-                    const selectedCandidate = position.candidates.find((c) => c.selected);
-                    
-                    return (
-                      <motion.div
-                        key={position.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: positionIndex * 0.1 }}
-                        className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200/50"
-                      >
-                        {/* Position Header */}
-                        <div className="bg-gradient-to-r from-blue-50/80 to-white px-8 py-6 border-b border-blue-100">
-                          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                            <motion.div 
-                              className="flex items-center gap-6"
-                              whileHover={{ scale: 1.02 }}
-                            >
-                              <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center shadow-lg">
-                                <Award className="w-7 h-7 text-blue-600" />
-                              </div>
-                              <div>
-                                <h3 className="text-2xl font-bold text-gray-900">
-                                  {position.position}
-                                </h3>
-                                <p className="text-gray-600">
-                                  {position.candidates.length} candidate
-                                  {position.candidates.length !== 1 ? "s" : ""}
-                                </p>
-                              </div>
-                            </motion.div>
-
-                            {position.submitted ? (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full font-semibold flex items-center gap-2 shadow-lg"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                                <span>Submitted</span>
-                              </motion.div>
-                            ) : votingEnded ? (
-                              <div className="text-gray-500 font-medium">Voting Ended</div>
-                            ) : (
-                              <div className="text-right">
-                                <p className="text-gray-600">
-                                  {selectedCandidate
-                                    ? `Selected: ${selectedCandidate.name}`
-                                    : "Select one candidate"}
-                                </p>
-                              </div>
-                            )}
+                        {position.submitted ? (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full font-semibold flex items-center gap-2 shadow-lg text-sm sm:text-base"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            <span>Submitted</span>
+                          </motion.div>
+                        ) : votingEnded ? (
+                          <div className="text-gray-500 font-medium text-sm sm:text-base">
+                            Voting Ended
                           </div>
-                        </div>
+                        ) : (
+                          <div className="text-right">
+                            <p className="text-gray-600 text-sm sm:text-base">
+                              Select one candidate
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
-                        {/* Candidates Grid */}
-                        <div className="p-8">
-                          {position.candidates.length === 0 ? (
-                            <div className="text-center py-12 text-gray-500">
-                              No candidates available
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                              {position.candidates.map((candidate, candidateIndex) => {
-                                const isWinner = winners[position.id] === candidate.id;
-                                const candidateVotes = voteCounts[candidate.id] || candidate.votes || 0;
+                    {/* Candidates Grid */}
+                    <div className="p-6 sm:p-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {position.candidates.map(
+                          (candidate, candidateIndex) => {
+                            const isWinner =
+                              winners[position.id] === candidate.id;
+                            const candidateVotes =
+                              voteCounts[candidate.id] || candidate.votes || 0;
 
-                                return (
-                                  <motion.div
-                                    key={candidate.id}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: candidateIndex * 0.05 }}
-                                    whileHover={{ y: -8, scale: 1.02 }}
-                                    className={`relative rounded-xl border-2 transition-all duration-300 overflow-hidden ${
-                                      isWinner && showResults
-                                        ? "border-amber-300 bg-gradient-to-br from-amber-50/50 to-yellow-50/30"
-                                        : candidate.selected
-                                        ? "border-emerald-300 bg-gradient-to-br from-emerald-50/50 to-green-50/30"
-                                        : votingEnded
-                                        ? "border-gray-200 bg-gray-50/30"
-                                        : "border-gray-200 hover:border-blue-300 bg-white"
-                                    }`}
-                                  >
-                                    <div className="p-5">
-                                      {/* Candidate Info */}
-                                      <div className="flex items-center gap-4 mb-4">
-                                        <motion.div 
-                                          className="relative"
-                                          whileHover={{ rotate: 5 }}
-                                        >
-                                          <div className={`w-16 h-16 rounded-xl overflow-hidden ${
-                                            isWinner && showResults
-                                              ? "border-2 border-amber-300"
-                                              : candidate.selected
-                                              ? "border-2 border-emerald-300"
-                                              : "border border-gray-300"
-                                          }`}>
-                                            {candidate.photoUrl ? (
-                                              <img
-                                                src={candidate.photoUrl}
-                                                alt={candidate.name}
-                                                className="w-full h-full object-cover"
-                                              />
-                                            ) : (
-                                              <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                                                <span className="text-white font-bold text-lg">
-                                                  {getInitials(candidate.name)}
-                                                </span>
-                                              </div>
-                                            )}
-                                          </div>
-                                          
-                                          {/* Status Badges */}
-                                          <div className="absolute -top-2 -right-2 flex flex-col gap-1">
-                                            {candidate.selected && (
-                                              <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-full p-1.5 shadow-lg"
-                                              >
-                                                <CheckCircle className="w-3 h-3 text-white" />
-                                              </motion.div>
-                                            )}
-                                            {isWinner && showResults && (
-                                              <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                transition={{ delay: 0.2 }}
-                                                className="bg-gradient-to-r from-amber-500 to-yellow-600 rounded-full p-1.5 shadow-lg"
-                                              >
-                                                <Crown className="w-3 h-3 text-white" />
-                                              </motion.div>
-                                            )}
-                                          </div>
-                                        </motion.div>
-
-                                        <div className="flex-1 min-w-0">
-                                          <h4 className="font-bold text-gray-900 text-lg truncate">
-                                            {candidate.name}
-                                          </h4>
-                                          <p className="text-blue-600 font-semibold truncate">
-                                            {candidate.position}
-                                          </p>
-                                          {showResults && (
-                                            <p className="text-gray-600 font-bold mt-1">
-                                              {candidateVotes} votes
-                                            </p>
-                                          )}
-                                        </div>
-                                      </div>
-
-                                      {/* Status Tags */}
-                                      <div className="flex flex-wrap gap-2 mb-4">
-                                        {isWinner && showResults && (
-                                          <motion.span
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            className="px-3 py-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-full text-xs font-bold shadow"
-                                          >
-                                            🏆 Winner
-                                          </motion.span>
-                                        )}
-                                        {candidate.selected && (
-                                          <motion.span
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-full text-xs font-bold shadow"
-                                          >
-                                            ✓ Your Choice
-                                          </motion.span>
-                                        )}
-                                      </div>
-
-                                      {/* Action Buttons */}
-                                      <div className="space-y-3">
-                                        {!votingEnded && !position.submitted ? (
-                                          <>
-                                            <motion.button
-                                              whileHover={{ y: -2 }}
-                                              whileTap={{ scale: 0.98 }}
-                                              onClick={() => handleVote(candidate.id, position.id)}
-                                              disabled={candidate.selected}
-                                              className={`w-full py-3 rounded-lg font-bold text-white transition-all ${
-                                                candidate.selected
-                                                  ? "bg-gradient-to-r from-emerald-600 to-green-600 cursor-not-allowed"
-                                                  : "bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-black shadow-lg"
-                                              }`}
-                                            >
-                                              {candidate.selected ? "Selected" : "Select Candidate"}
-                                            </motion.button>
-                                            <motion.button
-                                              whileHover={{ y: -2 }}
-                                              whileTap={{ scale: 0.98 }}
-                                              onClick={() => handleProfileClick(candidate)}
-                                              className="w-full py-3 rounded-lg font-bold text-gray-700 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all"
-                                            >
-                                              View Profile
-                                            </motion.button>
-                                          </>
+                            return (
+                              <motion.div
+                                key={candidate.id}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: candidateIndex * 0.05 }}
+                                whileHover={{ y: -6 }}
+                                className={`relative rounded-xl border-2 transition-all duration-300 overflow-hidden shadow-md hover:shadow-xl ${
+                                  isWinner && showResults
+                                    ? "border-amber-300 bg-gradient-to-br from-amber-50/50 to-yellow-50/30"
+                                    : candidate.selected
+                                    ? "border-emerald-300 bg-gradient-to-br from-emerald-50/50 to-green-50/30"
+                                    : votingEnded
+                                    ? "border-gray-200 bg-gray-50/30"
+                                    : "border-gray-200 hover:border-blue-300 bg-white"
+                                }`}
+                              >
+                                <div className="p-4 sm:p-5">
+                                  {/* Candidate Profile - Centered */}
+                                  <div className="flex flex-col items-center mb-4">
+                                    <motion.div
+                                      className="relative mb-4"
+                                      whileHover={{ scale: 1.05 }}
+                                    >
+                                      <div
+                                        className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mx-auto shadow-xl ${
+                                          isWinner && showResults
+                                            ? "border-4 border-amber-300"
+                                            : candidate.selected
+                                            ? "border-4 border-emerald-300"
+                                            : "border-4 border-gray-100"
+                                        }`}
+                                      >
+                                        {candidate.photoUrl ? (
+                                          <img
+                                            src={candidate.photoUrl}
+                                            alt={candidate.name}
+                                            className="w-full h-full object-cover"
+                                          />
                                         ) : (
-                                          <motion.button
-                                            whileHover={{ y: -2 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={() => handleProfileClick(candidate)}
-                                            className="w-full py-3 rounded-lg font-bold text-gray-700 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all"
-                                          >
-                                            View Profile
-                                          </motion.button>
+                                          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                                            <span className="text-white font-bold text-xl sm:text-2xl">
+                                              {getInitials(candidate.name)}
+                                            </span>
+                                          </div>
                                         )}
+                                      </div>
+
+                                      {/* Status Badges */}
+                                      <div className="absolute -top-1 -right-1 flex flex-col gap-1">
+                                        {candidate.selected && (
+                                          <motion.div
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-full p-1.5 sm:p-2 shadow-lg"
+                                          >
+                                            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                                          </motion.div>
+                                        )}
+                                        {isWinner && showResults && (
+                                          <motion.div
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            transition={{ delay: 0.2 }}
+                                            className="bg-gradient-to-r from-amber-500 to-yellow-600 rounded-full p-1.5 sm:p-2 shadow-lg"
+                                          >
+                                            <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                                          </motion.div>
+                                        )}
+                                      </div>
+                                    </motion.div>
+
+                                    <div className="text-center">
+                                      <h4 className="font-bold text-gray-900 text-lg sm:text-xl truncate w-full">
+                                        {candidate.name}
+                                      </h4>
+                                      <p className="text-blue-600 font-semibold text-sm sm:text-base truncate w-full">
+                                        {candidate.position}
+                                      </p>
+                                      {showResults && (
+                                        <motion.p
+                                          initial={{ opacity: 0 }}
+                                          animate={{ opacity: 1 }}
+                                          className="text-gray-700 font-bold mt-2 text-base sm:text-lg"
+                                        >
+                                          {candidateVotes} votes
+                                        </motion.p>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Status Tags */}
+                                  <div className="flex flex-wrap justify-center gap-2 mb-4">
+                                    {isWinner && showResults && (
+                                      <motion.span
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="px-3 py-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-full text-xs font-bold shadow"
+                                      >
+                                        🏆 Winner
+                                      </motion.span>
+                                    )}
+                                    {candidate.selected && (
+                                      <motion.span
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-full text-xs font-bold shadow"
+                                      >
+                                        ✓ Your Choice
+                                      </motion.span>
+                                    )}
+                                  </div>
+
+                                  {/* Action Button - Centered */}
+                                  <div className="mt-4 flex justify-center">
+                                    {!votingEnded && !position.submitted ? (
+                                      <motion.button
+                                        whileHover={{ y: -2 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() =>
+                                          handleVote(candidate.id, position.id)
+                                        }
+                                        disabled={candidate.selected}
+                                        className={`w-32 sm:w-40 py-2 sm:py-3 rounded-lg font-bold  text-black cursor-pointer  transition-all text-xs sm:text-sm md:text-base${ candidate.selected? "bg-gradient-to-r from-emerald-600 to-green-600 cursor-not-allowed" : "bg-gradient-to-r from-gray-900 to-gray-800 border-gray-900 hover:from-gray-800 hover:to-black shadow-lg"  }`}
+                                      >
+                                        {candidate.selected
+                                          ? "Selected"
+                                          : "Select Candidate"}
+                                      </motion.button>
+                                    ) : (
+                                      <div className="text-center py-2 sm:py-3">
+                                        <p className="text-gray-500 font-medium text-xs sm:text-sm">
+                                          {votingEnded
+                                            ? "Voting Ended"
+                                            : "Vote Submitted"}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Candidate Info (Compact) */}
+                                  <div className="mt-4 pt-4 border-t border-gray-900">
+                                    <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                                      <div className="text-gray-600 truncate">
+                                        <Briefcase className="w-3 ml-20 h-3 inline mr-1" />
+                                        {candidate.department}
+                                      </div>
+                                      <div className="text-gray-600 truncate text-right">
+                                        <MapPin className="w-3 h-3 inline mr-1" />
+                                        {candidate.location}
                                       </div>
                                     </div>
-                                  </motion.div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                          {/* Submit Section */}
-                          {!position.submitted && position.candidates.length > 0 && !votingEnded && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="mt-8 pt-8 border-t border-gray-200"
-                            >
-                              <div className="bg-gradient-to-r from-blue-50/50 to-indigo-50/30 rounded-2xl p-6 border-2 border-blue-100">
-                                <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-                                  <div>
-                                    <p className="text-xl font-bold text-gray-900 mb-2">
-                                      Ready to Submit Your Vote?
-                                    </p>
-                                    <p className="text-gray-700">
-                                      Selected candidate:{" "}
-                                      <span className="font-bold text-blue-700">
-                                        {selectedCandidate?.name || "Not selected yet"}
-                                      </span>
-                                    </p>
                                   </div>
-                                  <div className="flex gap-4">
+                                </div>
+                              </motion.div>
+                            );
+                          }
+                        )}
+                      </div>
+
+                      {/* Submit Section - Centered and Improved */}
+                      {!position.submitted &&
+                        position.candidates.length > 0 &&
+                        !votingEnded && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-8 pt-8 border-t border-gray-200"
+                          >
+                            <div className="bg-gradient-to-r from-blue-50/50 to-indigo-50/30 rounded-2xl p-6 border-2 border-blue-100">
+                              <div className="flex flex-col items-center justify-center gap-4 sm:gap-6">
+                                <div className="text-center">
+                                  <p className="text-xl font-bold text-gray-900 mb-1">
+                                    Ready to Submit Your Vote?
+                                  </p>
+                                  <p className="text-gray-700 text-sm sm:text-base">
+                                    {selectedCandidate
+                                      ? `Selected: ${selectedCandidate.name}`
+                                      : "No candidate selected"}
+                                  </p>
+                                </div>
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() =>
+                                      handleSubmitVote(
+                                        position.id,
+                                        position.position
+                                      )
+                                    }
+                                    disabled={!selectedCandidate}
+                                    className={`px-8 py-3.5 rounded-xl font-bold text-white text-base sm:text-lg flex items-center justify-center gap-3 transition-all shadow-lg min-w-[200px] ${
+                                      selectedCandidate
+                                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                                        : "bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed"
+                                    }`}
+                                  >
+                                    <Vote className="w-5 h-5" />
+                                    Submit Vote
+                                  </motion.button>
+                                  {selectedCandidate && (
                                     <motion.button
                                       whileHover={{ scale: 1.05 }}
                                       whileTap={{ scale: 0.95 }}
-                                      onClick={() => handleSubmitVote(position.id, position.position)}
-                                      disabled={!selectedCandidate}
-                                      className={`px-8 py-3.5 rounded-xl font-bold text-white text-lg flex items-center gap-3 transition-all shadow-lg ${
-                                        selectedCandidate
-                                          ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                                          : "bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed"
-                                      }`}
-                                    >
-                                      <Vote className="w-5 h-5" />
-                                      Submit Vote
-                                    </motion.button>
-                                    {selectedCandidate && (
-                                      <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => {
-                                          setPositions((prev) =>
-                                            prev.map((pos) =>
-                                              pos.id === position.id
-                                                ? {
-                                                    ...pos,
-                                                    candidates: pos.candidates.map((c) => ({
+                                      onClick={() => {
+                                        setPositions((prev) =>
+                                          prev.map((pos) =>
+                                            pos.id === position.id
+                                              ? {
+                                                  ...pos,
+                                                  candidates:
+                                                    pos.candidates.map((c) => ({
                                                       ...c,
                                                       selected: false,
                                                     })),
-                                                  }
-                                                : pos
-                                            )
-                                          );
-                                        }}
-                                        className="px-6 py-3.5 rounded-xl font-bold text-gray-700 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all"
-                                      >
-                                        Clear Selection
-                                      </motion.button>
-                                    )}
-                                  </div>
+                                                }
+                                              : pos
+                                          )
+                                        );
+                                      }}
+                                      className="px-6 py-3.5 rounded-xl font-bold text-gray-700 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all min-w-[160px] text-sm sm:text-base"
+                                    >
+                                      Clear Selection
+                                    </motion.button>
+                                  )}
                                 </div>
                               </div>
-                            </motion.div>
-                          )}
+                            </div>
+                          </motion.div>
+                        )}
 
-                          {/* Winner Announcement */}
-                          {votingEnded && showResults && winners[position.id] && (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              className="mt-8 p-8 bg-gradient-to-r from-amber-50 via-yellow-50/50 to-amber-50 rounded-2xl border-2 border-amber-300"
-                            >
-                              <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-                                <div className="flex items-center gap-6">
-                                  <div className="relative">
-                                    <div className="bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl p-4 shadow-xl">
-                                      <Trophy className="w-10 h-10 text-white" />
-                                    </div>
-                                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                      <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse" />
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <h4 className="text-xl font-bold text-gray-900 mb-2">
-                                      🎉 Winner Announced!
-                                    </h4>
-                                    <p className="text-gray-700">
-                                      Congratulations to{" "}
-                                      <span className="font-bold text-amber-700">
-                                        {position.candidates.find(c => c.id === winners[position.id])?.name}
-                                      </span>{" "}
-                                      for winning the {position.position} position
-                                    </p>
-                                  </div>
+                      {/* Winner Announcement */}
+                      {votingEnded && showResults && winners[position.id] && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="mt-8 p-6 sm:p-8 bg-gradient-to-r from-amber-50 via-yellow-50/50 to-amber-50 rounded-2xl border-2 border-amber-300"
+                        >
+                          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8">
+                            <div className="flex items-center gap-4 sm:gap-6">
+                              <div className="relative">
+                                <div className="bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl p-4 shadow-xl">
+                                  <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                                 </div>
-                                <div className="bg-white rounded-xl px-8 py-6 shadow-lg border-2 border-amber-200">
-                                  <p className="text-3xl font-bold text-amber-600">
-                                    {voteCounts[winners[position.id]] || 
-                                     position.candidates.find(c => c.id === winners[position.id])?.votes || 
-                                     0}
-                                  </p>
-                                  <p className="text-gray-600 font-medium">Total Votes</p>
+                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                  <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse" />
                                 </div>
                               </div>
-                            </motion.div>
-                          )}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )}
+                              <div>
+                                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                                  🎉 Winner Announced!
+                                </h4>
+                                <p className="text-gray-700 text-sm sm:text-base">
+                                  Congratulations to{" "}
+                                  <span className="font-bold text-amber-700">
+                                    {
+                                      position.candidates.find(
+                                        (c) => c.id === winners[position.id]
+                                      )?.name
+                                    }
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+                            <div className="bg-white rounded-xl px-6 py-4 sm:px-8 sm:py-6 shadow-lg border-2 border-amber-200">
+                              <p className="text-2xl sm:text-3xl font-bold text-amber-600">
+                                {voteCounts[winners[position.id]] ||
+                                  position.candidates.find(
+                                    (c) => c.id === winners[position.id]
+                                  )?.votes ||
+                                  0}
+                              </p>
+                              <p className="text-gray-600 font-medium text-sm sm:text-base">
+                                Total Votes
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
 
               {/* Footer Summary */}
-              {positions.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-8 bg-white rounded-2xl shadow-lg p-8 border border-gray-200/50"
-                >
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        Voting Summary
-                      </h3>
-                      <p className="text-gray-600">
-                        {votingEnded
-                          ? "Thank you for participating in the election!"
-                          : "Make sure to submit your votes for all positions before time ends."}
-                      </p>
-                    </div>
-                    <div className="flex gap-8">
-                      {[
-                        { 
-                          value: Object.values(submittedVotes).filter(Boolean).length, 
-                          label: "Submitted", 
-                          color: "green" 
-                        },
-                        { 
-                          value: positions.length - Object.values(submittedVotes).filter(Boolean).length, 
-                          label: "Pending", 
-                          color: "blue" 
-                        },
-                        ...(votingEnded ? [{
-                          value: Object.keys(winners).length, 
-                          label: "Winners", 
-                          color: "amber" 
-                        }] : [])
-                      ].map((stat, index) => (
-                        <motion.div
-                          key={stat.label}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="text-center"
-                        >
-                          <p className={`text-3xl font-bold text-${stat.color}-600`}>
-                            {stat.value}
-                          </p>
-                          <p className="text-sm text-gray-600">{stat.label}</p>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-                    <p className="text-gray-500 text-sm">
-                      Secure Voting Platform • Encrypted Ballot System • {new Date().getFullYear()}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-8 bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200/50"
+              >
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                      Voting Summary
+                    </h3>
+                    <p className="text-gray-600 text-sm sm:text-base">
+                      {votingEnded
+                        ? "Thank you for participating in the election!"
+                        : "Make sure to submit your votes for all positions before time ends."}
                     </p>
                   </div>
-                </motion.div>
-              )}
-            </motion.div>
+                  <div className="flex gap-6 sm:gap-8">
+                    {[
+                      {
+                        value:
+                          Object.values(submittedVotes).filter(Boolean).length,
+                        label: "Submitted",
+                        color: "green",
+                      },
+                      {
+                        value:
+                          positions.length -
+                          Object.values(submittedVotes).filter(Boolean).length,
+                        label: "Pending",
+                        color: "blue",
+                      },
+                      ...(votingEnded
+                        ? [
+                            {
+                              value: Object.keys(winners).length,
+                              label: "Winners",
+                              color: "amber",
+                            },
+                          ]
+                        : []),
+                    ].map((stat, index) => (
+                      <motion.div
+                        key={stat.label}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="text-center"
+                      >
+                        <p
+                          className={`text-2xl sm:text-3xl font-bold text-${stat.color}-600`}
+                        >
+                          {stat.value}
+                        </p>
+                        <p className="text-xs sm:text-sm text-gray-600">
+                          {stat.label}
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+                  <p className="text-gray-500 text-xs sm:text-sm">
+                    Secure Voting Platform • Encrypted Ballot System •{" "}
+                    {new Date().getFullYear()}
+                  </p>
+                </div>
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </div>
